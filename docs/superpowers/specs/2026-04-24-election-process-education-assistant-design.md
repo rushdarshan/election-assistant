@@ -112,20 +112,22 @@ No full street address. If ZIP is not provided, US timeline degrades gracefully 
 {
   "jurisdiction": {"country":"US","state":"CA"},
   "milestones": [
-    {"id":"register_by","label":"Register by","date":"2026-10-XX","confidence":"official"},
-    {"id":"election_day","label":"Election Day","date":"2026-11-03","confidence":"official"}
+    {"id":"register_by","label":"Register by","date":"YYYY-MM-DD","confidence":"official"},
+    {"id":"election_day","label":"Election Day","date":"YYYY-MM-DD","confidence":"official"}
   ],
   "checklist": [
-    {"id":"check_registration","label":"Check registration status","link":"..."}
+    {"id":"check_registration","label":"Check registration status","link":"https://www.nass.org/can-i-vote/voter-registration-status"}
   ],
   "official_links": [
-    {"label":"State election office","url":"..."}
+    {"label":"Find your local election office","url":"https://www.usvotefoundation.org/election-offices"}
   ],
   "source_notes": [
     {"source":"google_civic","details":"elections + voter info"}
   ]
 }
 ```
+
+Note: example dates/links are illustrative; the timeline engine must populate real milestones per jurisdiction/provider.
 
 ### Knowledge base document format (RAG)
 Each KB doc is a small markdown file with front matter:
@@ -247,22 +249,50 @@ Output (illustrative):
     "Whether signature matching is used and how it is handled."
   ],
   "next_steps": [
-    {"label":"Check registration status","url":"{{from_timeline_context}}"},
-    {"label":"State election office","url":"{{from_timeline_context_or_kb_source_url}}"}
+    {"label":"Check registration status","url":"https://www.nass.org/can-i-vote/voter-registration-status"},
+    {"label":"Find your local election office","url":"https://www.usvotefoundation.org/election-offices"}
   ],
   "if_something_goes_wrong": [
-    "Ask the poll workers what options are available if you are not found on the roll.",
-    "Contact your local election office as soon as possible for guidance."
+    "If your name is not found, ask poll workers what options are available in your state.",
+    "Contact your local election office for the fastest guidance."
   ],
   "citations": [
-    {"kb_id":"us-can-i-vote-hub","quote":"...links directly to state election websites and trusted resources..."}
+    {"kb_id":"us-can-i-vote-hub","quote":"This nonpartisan website was created by state election officials to help eligible voters figure out how and where to go vote."},
+    {"kb_id":"us-can-i-vote-hub","quote":"Can I Vote does not capture any information, but instead links directly to state election websites and trusted resources."}
   ],
-  "disclaimer": "Voting rules differ by state. Confirm details using your state/local election office links."
+  "disclaimer": "Voting rules differ by state. Confirm details using your official state/local election office links."
 }
 ```
 
 #### Example 2 — topic_id = "moved_wrong_precinct"
 Output emphasizes jurisdiction differences and official contact steps.
+```json
+{
+  "topic_id": "moved_wrong_precinct",
+  "summary": "Your ballot can change when you move because local races and measures vary by address.",
+  "explanation": [
+    "Your precinct/jurisdiction determines which local contests and ballot measures appear on your ballot.",
+    "If you moved, you may need to update your registration to vote the correct ballot.",
+    "Deadlines and options differ by state, so check your official election office links."
+  ],
+  "what_varies": [
+    "How late you can update your registration after moving.",
+    "Whether you can vote a provisional ballot and what proof is required."
+  ],
+  "next_steps": [
+    {"label":"Check registration status","url":"https://www.nass.org/can-i-vote/voter-registration-status"},
+    {"label":"Find your local election office","url":"https://www.usvotefoundation.org/election-offices"}
+  ],
+  "if_something_goes_wrong": [
+    "If you are at the wrong location, ask where you should vote for your current address.",
+    "If you are told you are not eligible, ask what your state’s process is for provisional voting."
+  ],
+  "citations": [
+    {"kb_id":"us-can-i-vote-hub","quote":"Need help with voting? You've come to the right place."}
+  ],
+  "disclaimer": "Confirm move-related rules with your state/local election office because they differ by jurisdiction."
+}
+```
 
 ## 8) Security & privacy
 
