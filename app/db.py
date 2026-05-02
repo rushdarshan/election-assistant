@@ -29,12 +29,22 @@ db: Optional[AsyncIOMotorDatabase] = None
 async def connect_to_mongo():
     """Create MongoDB connection."""
     global client, db
-    client = AsyncIOMotorClient(MONGODB_URI, maxPoolSize=20, serverSelectionTimeoutMS=5000)
+    # maxPoolSize=2: prevents connection exhaustion in serverless environments (Vercel)
+    # where multiple lambda instances spin up simultaneously
+    client = AsyncIOMotorClient(
+        MONGODB_URI,
+        maxPoolSize=2,
+        minPoolSize=0,
+        serverSelectionTimeoutMS=5000,
+        connectTimeoutMS=5000,
+    )
     db = client[MONGODB_DB]
     # Verify connection
     await client.admin.command("ping")
     logger.info(f"Connected to MongoDB: {MONGODB_DB}")
-    await _ensure_indexes()
+    # Create indexes in background to avoid blocking startup
+    import asyncio
+    asyncio.ensure_future(_ensure_indexes())
 
 
 async def close_mongo():

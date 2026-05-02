@@ -593,7 +593,7 @@
             <div class="hero-copy">
                 <div class="countdown-banner">
                     <svg class="icon" aria-hidden="true" style="margin-right: 8px;"><use href="#icon-timeline"></use></svg>
-                    Next General Election (Est): <strong id="countdown-timer">Loading...</strong>
+                    2026 U.S. Midterm Election — November 3: <strong id="countdown-timer">Loading...</strong>
                 </div>
                 <div class="hero-kicker">Election process education</div>
                 <h1>Know exactly what to do before election day.</h1>
@@ -686,7 +686,7 @@
         <p class="subtitle">Skip the wizard and jump straight to your customized timeline if you already know your state and voting method.</p>
         
         <div class="card">
-            <form action="/timeline" method="POST" autocomplete="off">
+            <form action="/timeline" method="POST" hx-boost="true" autocomplete="off">
                 <div class="form-grid" style="margin-bottom: var(--space-lg);">
                     <div class="form-group">
                         <label for="qs-country">Country</label>

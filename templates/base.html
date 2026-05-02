@@ -6,28 +6,21 @@
     <meta name="description" content="Election Process Education Assistant — your personalized, step-by-step guide to voting deadlines, registration, and election day.">
     <title>{% block title %}Election Process Guide{% endblock %}</title>
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
-    <script>
-        // CSRF: read token from cookie and send as X-CSRFToken header on all HTMX requests
-        (function() {
-            function getCookie(name) {
-                var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-                return match ? decodeURIComponent(match[2]) : null;
-            }
-            var csrfToken = getCookie('csrftoken');
-            if (csrfToken) {
-                htmx.config.headers['X-CSRFToken'] = csrfToken;
-            }
-            document.addEventListener('htmx:afterSettle', function() {
-                var newToken = getCookie('csrftoken');
-                if (newToken) {
-                    htmx.config.headers['X-CSRFToken'] = newToken;
-                }
-            });
-        })();
-    </script>
+    <!-- CSRF token injected per-request via htmx:configRequest event listener (see bottom of body) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,600;7..72,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-XXXXXXXXXX');
+    </script>
+    
     <style>
         /* ── Design Tokens (Light Mode) ── */
         :root {
@@ -666,7 +659,9 @@
                     <li><a href="/scenarios" {% if active_nav == 'scenarios' %}aria-current="page"{% endif %} title="Scenarios"><svg class="icon"><use href="#icon-scenarios"></use></svg><span class="sr-only">Scenarios</span></a></li>
                     <li><a href="/checklist" {% if active_nav == 'checklist' %}aria-current="page"{% endif %} title="Checklist"><svg class="icon"><use href="#icon-checklist"></use></svg><span class="sr-only">Checklist</span></a></li>
                     <li><a href="/chat" {% if active_nav == 'chat' %}aria-current="page"{% endif %} title="Chat"><svg class="icon"><use href="#icon-chat"></use></svg><span class="sr-only">Chat</span></a></li>
+                    <li><a href="/evm" {% if active_nav == 'evm' %}aria-current="page"{% endif %} title="EVM Simulator"><svg class="icon"><use href="#icon-vote"></use></svg><span class="sr-only">EVM</span></a></li>
                     <li><a href="/map" {% if active_nav == 'map' %}aria-current="page"{% endif %} title="Map"><svg class="icon"><use href="#icon-map"></use></svg><span class="sr-only">Map</span></a></li>
+                    <li><a href="/profile" {% if active_nav == 'profile' %}aria-current="page"{% endif %} title="Profile"><svg class="icon"><use href="#icon-readiness"></use></svg><span class="sr-only">Profile</span></a></li>
                     <li><a href="/stats" {% if active_nav == 'stats' %}aria-current="page"{% endif %} title="Stats"><svg class="icon"><use href="#icon-stats"></use></svg><span class="sr-only">Stats</span></a></li>
                 </ul>
                 <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode" title="Toggle light/dark mode">
@@ -733,6 +728,39 @@
         // Respect system preference changes (only if user hasn't manually chosen)
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
             if (!localStorage.getItem('theme')) { initTheme(); }
+        });
+    </script>
+    <script>
+        document.body.addEventListener('htmx:configRequest', function(evt) {
+            let cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                let cookie = cookies[i].trim();
+                if (cookie.startsWith('csrftoken=')) {
+                    evt.detail.headers['X-CSRFToken'] = cookie.substring(10);
+                    break;
+                }
+            }
+        });
+        // Add CSRF hidden field to all non-HTMX POST forms
+        document.addEventListener('DOMContentLoaded', function() {
+            let csrfToken = null;
+            let cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                let cookie = cookies[i].trim();
+                if (cookie.startsWith('csrftoken=')) {
+                    csrfToken = cookie.substring(10);
+                    break;
+                }
+            }
+            if (csrfToken) {
+                document.querySelectorAll('form[method="POST"]:not([hx-post])').forEach(function(form) {
+                    let input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'csrf_token';
+                    input.value = csrfToken;
+                    form.appendChild(input);
+                });
+            }
         });
     </script>
 </body>

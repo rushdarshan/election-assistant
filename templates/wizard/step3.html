@@ -49,7 +49,7 @@
 
     <div>
         <h1 class="wizard-heading headline">Are you already registered to vote?</h1>
-        <form action="/wizard/step/3" method="POST" id="wizard-form">
+        <form action="/wizard/step/3" method="POST" hx-boost="true" id="wizard-form">
             <input type="hidden" name="country" value="{{ country|default('US') }}">
             <input type="hidden" name="state" value="{{ state|default('') }}">
             <input type="hidden" name="zip_code" value="{{ zip_code|default('') }}">

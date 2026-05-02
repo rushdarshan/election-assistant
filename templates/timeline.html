@@ -156,9 +156,19 @@
     {% if next_action %}
     <!-- Hero Action Card -->
     <div class="hero-action-card animate-fade-in-up">
-        <div class="jurisdiction-label">Next Action • {{ timeline.jurisdiction.state }}, {{ timeline.jurisdiction.country }}</div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-sm);">
+            <div class="jurisdiction-label" style="margin-bottom: 0;">Next Action • {{ timeline.jurisdiction.state }}, {{ timeline.jurisdiction.country }}</div>
+            <button onclick="readTimelineAloud()" class="badge" style="background: rgba(255,255,255,0.2); border: none; cursor: pointer; color: white;">
+                <span id="tts-icon">🔊</span> Read Aloud
+            </button>
+        </div>
         <h1>{{ next_action.label }}</h1>
-        <div class="action-date">{{ next_action.date }}</div>
+        <div class="action-date" style="display: flex; align-items: center; gap: var(--space-md);">
+            <span>{{ next_action.date }}</span>
+            <button onclick="addToCalendar('{{ next_action.label }}', '{{ next_action.date }}')" class="badge" style="background: var(--civic-accent); border: 1px solid rgba(255,255,255,0.3); color: white; cursor: pointer;">
+                📅 Add to Calendar
+            </button>
+        </div>
         
         <div class="provenance">
             <svg class="icon icon-sm" aria-hidden="true" style="color: var(--civic-accent);"><use href="#icon-readiness"></use></svg>
@@ -307,5 +317,52 @@
         });
         document.getElementById(`content-${tabId}`).classList.add('active');
     }
+
+    let ttsUtterance = null;
+    function readTimelineAloud() {
+        const icon = document.getElementById('tts-icon');
+        if (window.speechSynthesis.speaking) {
+            window.speechSynthesis.cancel();
+            icon.innerText = '🔊';
+            return;
+        }
+        const textToRead = "Your next action is: {{ next_action.label if next_action else 'None' }}. Scheduled for {{ next_action.date if next_action else 'None' }}.";
+        ttsUtterance = new SpeechSynthesisUtterance(textToRead);
+        
+        // Simple language detection (could be enhanced based on UI state)
+        if (document.documentElement.lang === "hi") {
+            ttsUtterance.lang = "hi-IN";
+        } else {
+            ttsUtterance.lang = "en-US";
+        }
+        
+        ttsUtterance.onstart = () => icon.innerText = '⏸️';
+        ttsUtterance.onend = () => icon.innerText = '🔊';
+        window.speechSynthesis.speak(ttsUtterance);
+    }
+
+    function addToCalendar(title, dateStr) {
+        // Simple parser assuming "Month DD, YYYY" or similar
+        const date = new Date(dateStr);
+        if (isNaN(date.getTime())) {
+            alert("Could not parse the date to add to calendar.");
+            return;
+        }
+        
+        // Format to YYYYMMDD
+        const yyyy = date.getFullYear();
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const dd = String(date.getDate()).padStart(2, '0');
+        const dateFormatted = `${yyyy}${mm}${dd}`;
+        
+        // All-day event link
+        const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${dateFormatted}/${dateFormatted}&details=Added%20via%20Election%20Assistant`;
+        window.open(url, '_blank', 'noopener,noreferrer');
+    }
+
+    // Set achievement flag
+    document.addEventListener('DOMContentLoaded', () => {
+        localStorage.setItem('timeline_generated', 'true');
+    });
 </script>
 {% endblock %}

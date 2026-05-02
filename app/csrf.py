@@ -53,10 +53,7 @@ _csrf_store = CSRFTokens()
 COOKIE_NAME = "csrftoken"
 HEADER_NAME = "X-CSRFToken"
 SAFE_METHODS = {"GET", "HEAD", "OPTIONS"}
-FORM_CONTENT_TYPES = {
-    "application/x-www-form-urlencoded",
-    "multipart/form-data",
-}
+
 
 
 class CSRFMiddleware(BaseHTTPMiddleware):
@@ -92,6 +89,14 @@ class CSRFMiddleware(BaseHTTPMiddleware):
         # For form submissions (multipart or urlencoded): validate CSRF token
         cookie_token = request.cookies.get(COOKIE_NAME)
         header_token = request.headers.get(HEADER_NAME)
+
+        # Also accept token from hidden form field (for non-HTMX forms)
+        if not header_token:
+            try:
+                form_data = await request.form()
+                header_token = form_data.get("csrf_token")
+            except Exception:
+                pass
 
         if not cookie_token or not header_token:
             return Response(status_code=403, content="CSRF token missing")

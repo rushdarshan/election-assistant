@@ -20,6 +20,8 @@ import bcrypt
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
+import uuid
+
 limiter = Limiter(key_func=get_remote_address)
 
 logger = logging.getLogger(__name__)
@@ -28,7 +30,10 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 security = HTTPBearer(auto_error=False)
 
 # ── Configuration ──
-JWT_SECRET = os.getenv("JWT_SECRET", os.urandom(32).hex())
+_raw_secret = os.getenv("JWT_SECRET", "")
+if not _raw_secret and os.getenv("VERCEL"):
+    raise RuntimeError("JWT_SECRET environment variable is required in production. Set it in Vercel project settings.")
+JWT_SECRET = _raw_secret or os.urandom(32).hex()  # dev-only fallback
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRY_DAYS = 7
 FIREBASE_PROJECT_ID = os.getenv("FIREBASE_PROJECT_ID", "")
@@ -97,7 +102,12 @@ def _create_jwt(user_id: str) -> str:
 
 def _decode_jwt(token: str) -> dict:
     import jwt
-    return jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+    return jwt.decode(
+        token,
+        JWT_SECRET,
+        algorithms=[JWT_ALGORITHM],
+        options={"require": ["exp", "sub", "iat"]},
+    )
 
 
 async def get_current_user(
@@ -116,7 +126,7 @@ async def get_current_user(
             # Try MongoDB fallback
             mongo_db = _get_mongo_db()
             if mongo_db:
-                doc = await mongo_db.users.find_one({"_id": user_id})
+                doc = await mongo_db.users.find_one({"id": user_id})
                 if doc:
                     doc.pop("_id", None)
                     _users[user_id] = doc
@@ -170,7 +180,7 @@ async def register(request: Request, req: RegisterRequest):
             status_code=status.HTTP_409_CONFLICT,
             detail="Email already registered",
         )
-    user_id = f"user_{len(_users) + 1}"
+    user_id = f"user_{uuid.uuid4().hex[:12]}"
     _users[user_id] = {
         "id": user_id,
         "email": email,
@@ -248,7 +258,7 @@ async def google_auth(request: Request, req: GoogleAuthRequest):
     # Check if user exists
     if email not in _email_to_id:
         # Create new user
-        user_id = f"user_{len(_users) + 1}"
+        user_id = f"user_{uuid.uuid4().hex[:12]}"
         _users[user_id] = {
             "id": user_id,
             "email": email,
@@ -312,15 +322,12 @@ def _verify_firebase_token(id_token_str: str) -> dict:
                 "firebase_uid": decoded_token.get("uid", ""),
             }
         else:
-            # Development mode: decode JWT without verification
-            import jwt
-            # Decode without verification for development
-            decoded = jwt.decode(id_token_str, options={"verify_signature": False})
-            return {
-                "email": decoded.get("email", ""),
-                "name": decoded.get("name", ""),
-                "firebase_uid": decoded.get("sub", ""),
-            }
+            # Google auth is not configured — refuse rather than silently accept unverified tokens
+            logger.error("Google OAuth endpoint called but FIREBASE_PROJECT_ID is not configured")
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Google authentication is not configured on this server",
+            )
     except Exception as e:
         logger.warning(f"Firebase token verification failed: {e}")
         raise HTTPException(

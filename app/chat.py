@@ -14,13 +14,36 @@ if api_key:
     genai.configure(api_key=api_key)
     model = genai.GenerativeModel("gemini-1.5-flash", system_instruction="""You are an election assistant. Answer questions based on official U.S. election procedures. Do not speculate or give partisan advice. Keep responses under 100 words. Refuse speculation. Use HTML formatting for your answers (e.g. <p>, <ul>, <li>).""")
 
+QUICK_QUESTIONS = [
+    "How do I register to vote?",
+    "What ID do I need at the polls?",
+    "Can I vote by mail?",
+    "Where is my polling place?",
+    "What if I lost my voter ID?",
+    "How does early voting work?",
+]
+
+STATE_GREETINGS = {
+    "default": "Welcome! I can help with questions about voter registration, voting methods, ID requirements, deadlines, and more. What would you like to know?",
+}
+
+def build_state_greeting(state: str = None) -> str:
+    if state:
+        return f"Welcome! I can help with {state}-specific voting questions — registration, ID requirements, mail-in voting, and more. What would you like to know?"
+    return STATE_GREETINGS["default"]
+
 @router.get("/chat", response_class=HTMLResponse)
 async def chat_page(request: Request):
     chat_history = request.session.get("chat_history", [])
+    user_state = request.session.get("state")
+    state_greeting = build_state_greeting(user_state)
+    
     return templates.TemplateResponse(request=request, name="chat.html", context= {
         "request": request,
         "active_nav": "chat",
-        "chat_history": chat_history
+        "chat_history": chat_history,
+        "quick_questions": QUICK_QUESTIONS,
+        "state_greeting": state_greeting if not chat_history else None,
     })
 
 @router.post("/chat", response_class=HTMLResponse)

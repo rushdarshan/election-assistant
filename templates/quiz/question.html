@@ -1,7 +1,8 @@
 {% extends "base.html" %}
 {% block title %}Question {{ current_index + 1 }} of {{ total_questions }} — Voter Quiz{% endblock %}
 
-{% block extra_css %}
+{% block content %}
+<style>
 .quiz-page {
     max-width: 1000px;
     margin: 0 auto;
@@ -243,9 +244,8 @@
         font-size: 1.2rem;
     }
 }
-{% endblock %}
+</style>
 
-{% block content %}
 <div class="quiz-page">
     <!-- Progress Bar -->
     <div class="quiz-progress-bar animate-fade-in-up">
@@ -499,6 +499,7 @@ async function submitQuiz() {
         if (response.ok) {
             const result = await response.json();
             sessionStorage.setItem('quiz_result', JSON.stringify(result));
+            localStorage.setItem('quiz_completed', 'true');
             localStorage.removeItem('quiz_answers');
             window.location.href = '/quiz/results';
         } else {

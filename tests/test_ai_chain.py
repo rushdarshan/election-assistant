@@ -44,9 +44,9 @@ class TestHardcodedFallback:
         assert "deadline" in result["response"]["text"].lower()
 
     def test_id_keyword(self, ai_chain):
-        """Returns ID guidance for 'id' keyword."""
+        """Returns ID guidance from KB or hardcoded for 'id' keyword."""
         result = ai_chain.get_response("What ID do I need to vote?")
-        assert result["provider"] == "hardcoded"
+        assert result["provider"] in ("knowledge_base", "hardcoded")
 
     def test_mail_keyword(self, ai_chain):
         """Returns mail ballot guidance for 'mail' keyword."""
@@ -58,6 +58,21 @@ class TestHardcodedFallback:
         result = ai_chain.get_response("Something completely unrelated xyz")
         assert result["provider"] == "hardcoded"
         assert "response" in result
+
+
+class TestKnowledgeBaseFallback:
+    """Test local knowledge base fallback."""
+
+    def test_kb_returns_response_for_matching_topic(self, ai_chain):
+        """KB provides response for queries matching KB topics."""
+        result = ai_chain.get_response("what are the id requirements for voting")
+        assert result["provider"] == "knowledge_base"
+        assert "response" in result
+
+    def test_kb_returns_none_for_unrelated_query(self, ai_chain):
+        """Unrelated queries fall through to hardcoded."""
+        result = ai_chain.get_response("something completely unrelated about bananas")
+        assert result["provider"] == "hardcoded"
 
 
 class TestCaching:

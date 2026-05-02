@@ -46,7 +46,7 @@ select:focus, input[type="text"]:focus {
     <div>
         <h1 class="wizard-heading headline">Which state are you in?</h1>
 
-        <form action="/wizard/step/2" method="POST" autocomplete="off">
+        <form action="/wizard/step/2" method="POST" hx-boost="true" autocomplete="off">
             <input type="hidden" name="country" value="{{ country|default('US') }}">
 
             {% if country == 'IN' %}

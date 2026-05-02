@@ -3,9 +3,11 @@
 Fallback order:
 1. In-memory cache (MD5-keyed, TTL-based)
 2. Persistent MongoDB cache (if available)
-3. Vertex AI (primary, if configured)
-4. Direct Gemini API with key rotation (fallback)
-5. Hardcoded responses (keyword-matched, US election content)
+3. Mistral AI (if configured)
+4. Vertex AI (primary, if configured)
+5. Direct Gemini API with key rotation (fallback)
+6. Local Knowledge Base (keyword-matched, 100% offline)
+7. Hardcoded responses (keyword-matched, US election content)
 
 Tracks provider health, cooldowns, and response times.
 """
@@ -109,6 +111,12 @@ class AIProviderChain:
             except Exception as e:
                 logger.warning(f"Vertex AI unavailable: {e}")
 
+        # Mistral AI (Competitor Level 1 equivalent)
+        self._mistral_api_key = os.getenv("MISTRAL_API_KEY")
+        self._mistral_available = bool(self._mistral_api_key)
+        if self._mistral_available:
+            logger.info("Mistral AI initialized (primary provider option)")
+
         # Direct Gemini with key rotation (fallback)
         self._init_gemini()
 
@@ -124,7 +132,7 @@ class AIProviderChain:
                 key = self._key_rotator.current_key
                 if key:
                     genai.configure(api_key=key)
-                    self._gemini_models.append(genai.GenerativeModel("gemini-1.5-flash"))
+                    self._gemini_models.append(genai.GenerativeModel("gemini-2.0-flash"))
                     self._gemini_available = True
                     logger.info(f"Gemini API initialized with {len(self._key_rotator._keys)} key(s) for rotation")
             except Exception as e:
@@ -224,15 +232,18 @@ class AIProviderChain:
         """Get AI response through the fallback chain (sync for backward compatibility)."""
         import asyncio
         try:
-            loop = asyncio.get_running_loop()
+            asyncio.get_running_loop()
+            # Already in async context — run async path in a temporary event loop
+            # to get full MongoDB cache support
+            import concurrent.futures
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                future = executor.submit(
+                    asyncio.run,
+                    self.get_response_async(prompt, system_prompt, response_mime_type),
+                )
+                return future.result(timeout=30)
         except RuntimeError:
-            loop = None
-
-        if loop:
-            # Already in async context, use sync fallback
             return self._get_response_sync(prompt, system_prompt, response_mime_type)
-        else:
-            return asyncio.run(self.get_response_async(prompt, system_prompt, response_mime_type))
 
     async def get_response_async(
         self,
@@ -257,7 +268,24 @@ class AIProviderChain:
             self._set_cache(cache_key, mongo_cached)
             return {**mongo_cached, "cached": True}
 
-        # Step 3: Try Vertex AI
+        # Step 3: Try Mistral (Level 1 equivalent)
+        if self._mistral_available and not self._is_on_cooldown("mistral"):
+            try:
+                start = time.time()
+                response = await self._call_mistral_async(prompt, system_prompt, response_mime_type)
+                elapsed = (time.time() - start) * 1000
+                self.stats.record_response_time(elapsed)
+                self.stats.successes += 1
+                result = {"response": response, "provider": "mistral", "response_time_ms": elapsed}
+                self._set_cache(cache_key, result)
+                await self._set_mongo_cache(cache_key, result)
+                return result
+            except Exception as e:
+                logger.warning(f"Mistral AI failed: {e}")
+                self.stats.failures += 1
+                self._set_cooldown("mistral", 120)
+
+        # Step 4: Try Vertex AI
         if self._vertex_available and not self._is_on_cooldown("vertex"):
             try:
                 start = time.time()
@@ -293,7 +321,16 @@ class AIProviderChain:
                 self.stats.failures += 1
                 self._set_cooldown("gemini", 60)
 
-        # Step 5: Hardcoded fallback
+        # Step 5: Local Knowledge Base Failsafe
+        kb_response = self._get_kb_response(prompt)
+        if kb_response:
+            self.stats.fallback_used += 1
+            logger.info("Using local knowledge base response")
+            result = {"response": kb_response, "provider": "knowledge_base", "response_time_ms": 0}
+            self._set_cache(cache_key, result)
+            return result
+
+        # Step 6: Hardcoded fallback
         self.stats.fallback_used += 1
         logger.info("Using hardcoded fallback response")
         fallback_response = self._get_hardcoded_response(prompt)
@@ -343,7 +380,7 @@ class AIProviderChain:
                 key = self._key_rotator.current_key
                 genai.configure(api_key=key)
                 model = genai.GenerativeModel(
-                    model_name="gemini-1.5-flash",
+                    model_name="gemini-2.0-flash",
                     system_instruction=system_prompt or None,
                 )
                 config = genai.types.GenerationConfig(
@@ -367,7 +404,16 @@ class AIProviderChain:
                 self.stats.failures += 1
                 self._set_cooldown("gemini", 60)
 
-        # Step 4: Hardcoded fallback
+        # Step 4: Local Knowledge Base Failsafe
+        kb_response = self._get_kb_response(prompt)
+        if kb_response:
+            self.stats.fallback_used += 1
+            logger.info("Using local knowledge base response (sync)")
+            result = {"response": kb_response, "provider": "knowledge_base", "response_time_ms": 0}
+            self._set_cache(cache_key, result)
+            return result
+
+        # Step 5: Hardcoded fallback
         self.stats.fallback_used += 1
         logger.info("Using hardcoded fallback response")
         fallback_response = self._get_hardcoded_response(prompt)
@@ -378,11 +424,55 @@ class AIProviderChain:
             "response_time_ms": 0,
         }
 
+    async def _call_mistral_async(
+        self,
+        prompt: str,
+        system_prompt: str = "",
+        response_mime_type: Optional[str] = None,
+    ) -> str:
+        """Call Mistral AI REST API via httpx."""
+        import httpx
+        messages = []
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+        
+        # If response format is JSON, append to prompt for Mistral
+        if response_mime_type == "application/json":
+            prompt += "\n\nYou MUST return raw, valid JSON only."
+            
+        messages.append({"role": "user", "content": prompt})
+
+        url = "https://api.mistral.ai/v1/chat/completions"
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self._mistral_api_key}"
+        }
+        payload = {
+            "model": "mistral-small-latest",
+            "messages": messages,
+            "temperature": 0.2 if response_mime_type == "application/json" else 0.7,
+            "max_tokens": 1024
+        }
+        
+        async with httpx.AsyncClient(timeout=20.0) as client:
+            response = await client.post(url, headers=headers, json=payload)
+            response.raise_for_status()
+            data = response.json()
+            text = data["choices"][0]["message"]["content"]
+            
+            if response_mime_type == "application/json":
+                import re
+                json_match = re.search(r"```(?:json)?\s*([\s\S]*?)\s*```", text)
+                if json_match:
+                    return json_match.group(1).strip()
+            
+            return text.strip()
+
     def _call_vertex(self, prompt: str, system_prompt: str, mime_type: Optional[str]) -> str:
         import google.cloud.aiplatform as aip
         from vertexai.generative_models import GenerativeModel, GenerationConfig
 
-        model = GenerativeModel("gemini-1.5-flash", system_instruction=system_prompt or None)
+        model = GenerativeModel("gemini-2.0-flash", system_instruction=system_prompt or None)
         config_kwargs = {"temperature": 0.3, "max_output_tokens": 1024}
         if mime_type:
             config_kwargs["response_mime_type"] = mime_type
@@ -394,6 +484,8 @@ class AIProviderChain:
         return response.text
 
     async def _call_gemini_async(self, prompt: str, system_prompt: str, mime_type: Optional[str]) -> str:
+        """Call Gemini API without blocking the event loop."""
+        import asyncio
         import google.generativeai as genai
 
         key = self._key_rotator.current_key
@@ -402,7 +494,7 @@ class AIProviderChain:
 
         genai.configure(api_key=key)
         model = genai.GenerativeModel(
-            model_name="gemini-1.5-flash",
+            model_name="gemini-2.0-flash",
             system_instruction=system_prompt or None,
         )
 
@@ -413,10 +505,27 @@ class AIProviderChain:
         if mime_type:
             config.response_mime_type = mime_type
 
-        response = model.generate_content(prompt, generation_config=config)
+        # Run the synchronous SDK call in a thread pool to avoid blocking the event loop
+        response = await asyncio.to_thread(model.generate_content, prompt, config)
         if not response.text:
             raise RuntimeError("Empty response from Gemini API")
         return response.text
+
+    def _get_kb_response(self, prompt: str) -> Optional[dict]:
+        """Try to answer from the local knowledge base."""
+        try:
+            from app.kb import build_kb_context
+            context = build_kb_context(prompt)
+            if not context:
+                return None
+
+            return {
+                "text": f"Based on our verified knowledge base:\n\n{context}",
+                "source": "knowledge_base",
+            }
+        except Exception as e:
+            logger.warning(f"Knowledge base lookup failed: {e}")
+            return None
 
     def _get_hardcoded_response(self, prompt: str) -> dict:
         prompt_lower = prompt.lower()

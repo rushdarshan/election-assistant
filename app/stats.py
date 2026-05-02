@@ -4,6 +4,7 @@ import time
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
+from app.ai_chain import ai_chain
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
@@ -54,5 +55,6 @@ async def view_stats(request: Request):
         "endpoints": dict(stats_data["endpoints"]),
         "avg_times": avg_times,
         "topics": dict(stats_data["topics"]),
-        "ai_provider": stats_data["ai_provider"]
+        "ai_provider": stats_data["ai_provider"],
+        "ai_chain": ai_chain
     })

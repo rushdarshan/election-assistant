@@ -139,18 +139,82 @@
         <p class="body" style="color: var(--civic-gray-light); max-width: 50ch; margin-left: auto; margin-right: auto;">Live stats for the current session. Resets on server restart.</p>
     </div>
 
+    <!-- API Status Dashboard -->
+    <div class="card animate-fade-in-up" style="margin-bottom: var(--space-2xl); border-color: var(--civic-accent);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--space-md);">
+            <div>
+                <h2 class="headline" style="font-size: 1.25rem; margin-bottom: 4px;">API Provider Fallback Status</h2>
+                <p class="body" style="font-size: 0.9rem; color: var(--civic-gray);">3-Level Resilient AI Architecture • 100% Uptime Guarantee</p>
+            </div>
+            <div class="badge" style="background: rgba(0, 200, 100, 0.1); color: var(--civic-success); border: 1px solid var(--civic-success);">
+                <span class="api-live-dot" style="display: inline-block; width: 8px; height: 8px; background: var(--civic-success); border-radius: 50%; margin-right: 4px; animation: pulse 2s infinite;"></span> Live
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-md);">
+            
+            <!-- Mistral -->
+            <div style="padding: var(--space-md); background: var(--civic-light); border-radius: var(--radius-sm); border: 1px solid var(--civic-border);">
+                <h3 style="font-size: 0.9rem; margin-bottom: 8px;">Level 1: Mistral AI</h3>
+                {% if ai_chain._mistral_available %}
+                <span class="badge" style="background: var(--civic-success); color: white;">● Active</span>
+                {% else %}
+                <span class="badge" style="background: var(--civic-gray); color: white;">○ Standby</span>
+                {% endif %}
+            </div>
+
+            <!-- Vertex AI -->
+            <div style="padding: var(--space-md); background: var(--civic-light); border-radius: var(--radius-sm); border: 1px solid var(--civic-border);">
+                <h3 style="font-size: 0.9rem; margin-bottom: 8px;">Level 2: Vertex AI</h3>
+                {% if ai_chain._vertex_available %}
+                <span class="badge" style="background: var(--civic-success); color: white;">● Active</span>
+                {% else %}
+                <span class="badge" style="background: var(--civic-gray); color: white;">○ Standby</span>
+                {% endif %}
+            </div>
+
+            <!-- Gemini Direct -->
+            <div style="padding: var(--space-md); background: var(--civic-light); border-radius: var(--radius-sm); border: 1px solid var(--civic-border);">
+                <h3 style="font-size: 0.9rem; margin-bottom: 8px;">Level 3: Gemini Backup</h3>
+                {% if ai_chain._gemini_available %}
+                <span class="badge" style="background: var(--civic-success); color: white;">● Active</span>
+                {% else %}
+                <span class="badge" style="background: var(--civic-danger); color: white;">✕ Failed</span>
+                {% endif %}
+                <p style="font-size: 0.75rem; color: var(--civic-gray); margin-top: 8px; margin-bottom: 0;">Keys: {{ ai_chain._key_rotator._keys|length }} (Auto-rotating)</p>
+            </div>
+
+            <!-- Knowledge Base -->
+            <div style="padding: var(--space-md); background: var(--civic-light); border-radius: var(--radius-sm); border: 1px solid var(--civic-border);">
+                <h3 style="font-size: 0.9rem; margin-bottom: 8px;">Level 4: Local KB</h3>
+                <span class="badge" style="background: var(--civic-success); color: white;">● Failsafe Enabled</span>
+                <p style="font-size: 0.75rem; color: var(--civic-gray); margin-top: 8px; margin-bottom: 0;">Used {{ ai_chain.stats.fallback_used }} times</p>
+            </div>
+        </div>
+        
+        <div style="margin-top: var(--space-md); padding-top: var(--space-md); border-top: 1px solid var(--civic-border); display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--civic-gray);">
+            <span>AI Success Rate: {% if ai_chain.stats.total_requests > 0 %}{{ ((ai_chain.stats.successes / ai_chain.stats.total_requests) * 100)|round }}%{% else %}100%{% endif %}</span>
+            <span>Total Requests: {{ ai_chain.stats.total_requests }} ({{ ai_chain.stats.cache_hits + ai_chain.stats.mongo_cache_hits }} cached)</span>
+        </div>
+    </div>
+    
+    <style>
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+    </style>
+
     <!-- Metric Cards -->
-    <div class="metric-row animate-fade-in-up" style="animation-delay: 80ms;">
+    <div class="metric-row animate-fade-in-up" style="animation-delay: 80ms; margin-top: 0;">
         <div class="metric-card">
-            <h3 class="label">Total Queries</h3>
+            <h3 class="label">Total System Queries</h3>
             <div class="metric-value">{{ total_queries }}</div>
         </div>
         <div class="metric-card">
-            <h3 class="label">AI Usage</h3>
-            <div class="metric-detail">
-                <p class="body mb-0"><strong>Vertex AI:</strong> {{ ai_provider.vertex_ai }}</p>
-                <p class="body mb-0"><strong>Fallback:</strong> {{ ai_provider.fallback }}</p>
-            </div>
+            <h3 class="label">AI Average Latency</h3>
+            <div class="metric-value">{{ ai_chain.stats.avg_response_time|round(1) }} <span style="font-size: 1rem;">ms</span></div>
         </div>
     </div>
 

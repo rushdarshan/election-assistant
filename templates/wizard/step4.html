@@ -79,7 +79,7 @@
 
     <div>
         <h1 class="wizard-heading headline">How do you plan to vote?</h1>
-        <form action="/wizard/step/4" method="POST" autocomplete="off">
+        <form action="/wizard/step/4" method="POST" hx-boost="true" autocomplete="off">
             <input type="hidden" name="country" value="{{ country|default('US') }}">
             <input type="hidden" name="state" value="{{ state|default('') }}">
             <input type="hidden" name="zip_code" value="{{ zip_code|default('') }}">

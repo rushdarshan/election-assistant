@@ -11,7 +11,8 @@ from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 
-from app.db import db as mongo_db, create_query_log_doc
+from app import db as db_module
+from app.db import create_query_log_doc
 
 logger = logging.getLogger(__name__)
 
@@ -74,6 +75,7 @@ class QueryLogMiddleware(BaseHTTPMiddleware):
         error: Optional[str] = None,
     ):
         """Insert query log document into MongoDB."""
+        mongo_db = db_module.db
         if not mongo_db:
             return
         try:

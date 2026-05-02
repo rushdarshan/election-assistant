@@ -5,6 +5,7 @@
         {{ msg.content }}
     {% else %}
         {{ msg.content|safe }}
+        <button onclick="readChatAloud(this)" style="display: block; margin-top: 8px; background: none; border: none; font-size: 0.8rem; cursor: pointer; color: var(--civic-accent); padding: 0;">🔊 Read</button>
     {% endif %}
 </div>
 {% endfor %}
@@ -17,6 +18,7 @@
         {{ msg.content }}
     {% else %}
         {{ msg.content|safe }}
+        <button onclick="readChatAloud(this)" style="display: block; margin-top: 8px; background: none; border: none; font-size: 0.8rem; cursor: pointer; color: var(--civic-accent); padding: 0;">🔊 Read</button>
     {% endif %}
 </div>
 {% endfor %}

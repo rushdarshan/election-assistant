@@ -107,9 +107,40 @@
     margin-top: var(--space-sm);
 }
 
+/* ── Quick Question Chips ── */
+.quick-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+    padding: var(--space-sm) var(--space-md) var(--space-md);
+    justify-content: center;
+}
+.chip {
+    display: inline-block;
+    padding: 8px 14px;
+    background: var(--civic-light);
+    border: 1px solid var(--civic-border);
+    border-radius: 20px;
+    font-size: 0.82rem;
+    color: var(--civic-deep);
+    cursor: pointer;
+    transition: all var(--motion-quick);
+    white-space: nowrap;
+}
+.chip:hover {
+    background: var(--civic-accent);
+    color: white;
+    border-color: var(--civic-accent);
+}
+.chip:active {
+    transform: scale(0.97);
+}
+
 @media (max-width: 639px) {
     .chat-container { height: min(500px, 60vh); }
     .chat-msg { max-width: 90%; }
+    .quick-chips { padding: var(--space-xs) var(--space-sm) var(--space-sm); }
+    .chip { font-size: 0.78rem; padding: 6px 10px; }
 }
 {% endblock %}
 
@@ -126,12 +157,17 @@
 
     <div class="chat-container animate-fade-in-up" style="animation-delay: 80ms;">
         <div id="chat-history" class="chat-history" role="log" aria-live="polite" aria-label="Chat messages">
+            {% if state_greeting %}
+            <div class="chat-msg chat-assistant">
+                <p>{{ state_greeting }}</p>
+            </div>
+            {% endif %}
             {% include "chat_messages.html" %}
         </div>
 
         <div class="chat-input-bar">
             <form hx-post="/chat" hx-target="#chat-history" hx-swap="beforeend"
-                  hx-on::after-request="this.reset(); document.getElementById('chat-history').scrollTop = document.getElementById('chat-history').scrollHeight;"
+                  hx-on::after-request="this.reset(); document.getElementById('chat-history').scrollTop = document.getElementById('chat-history').scrollHeight; hideChips();"
                   hx-on::response-error="document.getElementById('chat-error').style.display='block';">
                 <input type="text" name="message" placeholder="Type your question here…" required
                        autocomplete="off" maxlength="500" aria-label="Your question"
@@ -151,12 +187,41 @@
                 <button type="button" onclick="this.parentElement.style.display='none'" style="background:none;border:none;color:var(--civic-danger);cursor:pointer;font-weight:600;margin-left:var(--space-sm);">✕</button>
             </div>
         </div>
+
+        {% if quick_questions %}
+        <div id="quick-chips" class="quick-chips">
+            {% for q in quick_questions %}
+            <button class="chip" onclick="askQuestion(this, '{{ q }}')">{{ q }}</button>
+            {% endfor %}
+        </div>
+        {% endif %}
     </div>
 </div>
 
 <script>
+    function askQuestion(btn, question) {
+        var input = document.getElementById('chat-input');
+        input.value = question;
+        input.focus();
+        // Auto-submit
+        var form = btn.closest('.chat-container').querySelector('form');
+        form.dispatchEvent(new Event('submit', {cancelable: true}));
+        hideChips();
+    }
+
+    function hideChips() {
+        var chips = document.getElementById('quick-chips');
+        if (chips) {
+            chips.style.transition = 'opacity 0.3s ease';
+            chips.style.opacity = '0';
+            setTimeout(function() { chips.style.display = 'none'; }, 300);
+        }
+    }
+
     document.body.addEventListener('htmx:beforeRequest', function(evt) {
         if(evt.detail.elt.tagName === 'FORM' && evt.detail.elt.querySelector('input[name="message"]')) {
+            let count = parseInt(localStorage.getItem('ai_questions_asked') || '0');
+            localStorage.setItem('ai_questions_asked', count + 1);
             document.getElementById('chat-indicator').style.display = 'block';
             document.getElementById('chat-submit-btn').disabled = true;
             document.getElementById('chat-error').style.display = 'none';
@@ -177,6 +242,31 @@
     window.onload = function() {
         var objDiv = document.getElementById("chat-history");
         if (objDiv) objDiv.scrollTop = objDiv.scrollHeight;
+    }
+    
+    let chatUtterance = null;
+    function readChatAloud(btn) {
+        if (window.speechSynthesis.speaking) {
+            window.speechSynthesis.cancel();
+            btn.innerText = '🔊 Read';
+            return;
+        }
+        
+        let clone = btn.parentElement.cloneNode(true);
+        clone.removeChild(clone.lastElementChild); // Remove the button
+        let textToRead = clone.innerText || clone.textContent;
+
+        chatUtterance = new SpeechSynthesisUtterance(textToRead);
+        
+        if (document.documentElement.lang === "hi") {
+            chatUtterance.lang = "hi-IN";
+        } else {
+            chatUtterance.lang = "en-US";
+        }
+        
+        chatUtterance.onstart = () => btn.innerText = '⏸️ Pause';
+        chatUtterance.onend = () => btn.innerText = '🔊 Read';
+        window.speechSynthesis.speak(chatUtterance);
     }
 </script>
 {% endblock %}

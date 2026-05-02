@@ -68,21 +68,21 @@ async def calculate_readiness_score(progress: ReadinessProgress) -> ReadinessSco
     next_steps = []
     if registration_ready < 100:
         if progress.registration_status is None:
-            next_steps.append("✅ Check your voter registration status")
+            next_steps.append("Check your voter registration status")
         elif progress.registration_status in ("no", "unsure"):
-            next_steps.append("✅ Register to vote or verify your registration")
+            next_steps.append("Register to vote or verify your registration")
     
     if voting_ready < 75:
         if not progress.voting_method:
-            next_steps.append("✅ Choose your voting method (in-person, early, or mail-in)")
+            next_steps.append("Choose your voting method (in-person, early, or mail-in)")
         if not progress.timeline_viewed:
-            next_steps.append("✅ Review your personalized timeline")
+            next_steps.append("Review your personalized timeline")
     
     if knowledge_ready < 70:
-        next_steps.append("✅ Take the readiness quiz to strengthen your knowledge")
+        next_steps.append("Take the readiness quiz to strengthen your knowledge")
     
     if progress.checklist_items_completed < 3:
-        next_steps.append("✅ Work through the voter checklist")
+        next_steps.append("Work through the voter checklist")
     
     # Default message if fully ready
     if not next_steps:

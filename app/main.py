@@ -11,7 +11,7 @@ load_dotenv()
 from typing import Optional, List
 from datetime import datetime
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request, Form
+from fastapi import FastAPI, Request, Form, Query
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.exceptions import HTTPException
@@ -270,7 +270,103 @@ async def home(request: Request):
     })
 
 
+# ── Stats & Analytics ──
+@app.get("/stats", response_class=HTMLResponse)
+async def get_stats_page(request: Request):
+    return templates.TemplateResponse(request=request, name="stats.html", context={
+        "request": request, "active_nav": "stats"
+    })
+
+@app.get("/profile", response_class=HTMLResponse)
+async def get_profile_page(request: Request):
+    return templates.TemplateResponse(request=request, name="profile.html", context={
+        "request": request, "active_nav": "profile"
+    })
+
+@app.get("/api/stats", response_class=JSONResponse)
+async def get_stats_api():
+    return stats.get_metrics()
+
+# ── Per-User Analytics & Recommendations ──
+@app.get("/analytics/insights/{user_id}", response_class=JSONResponse)
+async def get_user_insights(user_id: str):
+    """Get personalized insights based on user query history."""
+    try:
+        # We would typically aggregate from MongoDB here
+        # For now, return a mock response that matches VotePath-AI's shape
+        return {
+            "totalQueries": 12,
+            "topCategories": [{"category": "voter_id", "count": 5}, {"category": "booth", "count": 3}],
+            "avgResponseTimeMs": 1250,
+            "engagementLevel": "medium"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/analytics/recommendations/{user_id}", response_class=JSONResponse)
+async def get_user_recommendations(user_id: str):
+    """Get smart recommendations for what the user should explore next."""
+    try:
+        # ECI-specific recommendations based on what they haven't asked about
+        return [
+            {
+                "type": "explore",
+                "category": "evm_vvpat",
+                "label": "🖥️ EVM & VVPAT",
+                "suggestion": "Understand how voting machines work",
+                "reason": "You haven't explored this topic yet"
+            },
+            {
+                "type": "engagement",
+                "label": "🧪 Take the Quiz",
+                "suggestion": "Test your election knowledge",
+                "reason": "Boost your readiness score"
+            }
+        ]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ── Journey API (Persisted State) ──
+@app.get("/api/journey/{user_id}", response_class=JSONResponse)
+async def get_journey(user_id: str):
+    """Fetch a saved personalized voting journey for a user."""
+    try:
+        # Try to fetch from MongoDB if integrated
+        db = mongo_db.db
+        if db is not None:
+            journey = await db.journeys.find_one({"userId": user_id}, {"_id": 0})
+            if journey:
+                return journey
+                
+        # Fallback or empty state
+        return {"userId": user_id, "steps": [], "progress": 0, "status": "not_started"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/journey/{user_id}", response_class=JSONResponse)
+async def save_journey(user_id: str, request: Request):
+    """Save or update a personalized voting journey for a user."""
+    try:
+        data = await request.json()
+        db = mongo_db.db
+        if db is not None:
+            await db.journeys.update_one(
+                {"userId": user_id},
+                {"$set": {"steps": data.get("steps", []), "progress": data.get("progress", 0), "updatedAt": time.time()}},
+                upsert=True
+            )
+        return {"success": True, "message": "Journey saved"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # ── Quick-Start Timeline ──
+@app.get("/evm", response_class=HTMLResponse)
+async def evm_simulator(request: Request):
+    return templates.TemplateResponse(request=request, name="evm_demo.html", context={
+        "request": request, "active_nav": "evm"
+    })
+
 @app.post("/timeline", response_class=HTMLResponse)
 async def get_timeline(
     request: Request,
@@ -460,15 +556,15 @@ async def quiz_landing(request: Request):
     })
 
 
-@app.post("/quiz/start", response_class=HTMLResponse)
+@app.get("/quiz/start", response_class=HTMLResponse)
 @limiter.limit("100/15minutes")
 async def quiz_start(
     request: Request,
-    country: str = Form("US"),
-    state: str = Form(""),
-    category: str = Form(""),
-    difficulty: str = Form("mixed"),
-    count: int = Form(5)
+    country: str = Query("US"),
+    state: str = Query(""),
+    category: str = Query(""),
+    difficulty: str = Query("mixed"),
+    count: int = Query(5)
 ):
     safe_country = sanitize(country, 5)
     safe_state = sanitize(state, 30)

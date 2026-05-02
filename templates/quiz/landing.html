@@ -154,7 +154,7 @@
             </div>
         </div>
 
-        <form method="POST" action="/quiz/start" class="quiz-form-card animate-fade-in-up" style="animation-delay: 160ms;">
+        <form method="GET" action="/quiz/start" hx-boost="true" class="quiz-form-card animate-fade-in-up" style="animation-delay: 160ms;">
             <div class="form-group">
                 <label for="quiz-country" class="label">Country</label>
                 <select name="country" id="quiz-country" required onchange="updateQuizStates()">

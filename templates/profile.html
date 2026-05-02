@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+{% block title %}Your Voter Profile — Election Process Guide{% endblock %}
+
+{% block extra_css %}
+.profile-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: var(--space-2xl) var(--space-md);
+}
+
+/* Circular Gauge */
+.gauge-container {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    margin: 0 auto;
+}
+.gauge-svg {
+    transform: rotate(-90deg);
+    width: 100%;
+    height: 100%;
+}
+.gauge-bg {
+    fill: none;
+    stroke: var(--civic-border);
+    stroke-width: 12;
+}
+.gauge-value {
+    fill: none;
+    stroke: var(--civic-accent);
+    stroke-width: 12;
+    stroke-linecap: round;
+    transition: stroke-dasharray 1.5s var(--ease-out);
+}
+.gauge-text-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+.gauge-score {
+    font-size: 3rem;
+    font-weight: 700;
+    font-family: 'Literata', serif;
+    color: var(--civic-deep);
+    line-height: 1;
+}
+.gauge-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--civic-gray);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+/* Badges Grid */
+.badges-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: var(--space-md);
+}
+.badge-card {
+    background: var(--civic-light);
+    border: 1px solid var(--civic-border);
+    border-radius: var(--radius-sm);
+    padding: var(--space-md);
+    text-align: center;
+    transition: transform var(--motion-quick);
+}
+.badge-card.locked {
+    opacity: 0.6;
+    filter: grayscale(100%);
+}
+.badge-card:hover:not(.locked) {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow);
+}
+.badge-icon {
+    font-size: 2.5rem;
+    margin-bottom: var(--space-sm);
+}
+.badge-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--civic-deep);
+    margin-bottom: 4px;
+}
+.badge-desc {
+    font-size: 0.75rem;
+    color: var(--civic-gray);
+}
+{% endblock %}
+
+{% block content %}
+<div class="profile-container animate-fade-in-up">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-xl);">
+        <h1 class="headline" style="margin-bottom: 0;">Voter Profile</h1>
+        <button onclick="shareScore()" class="badge" style="background: var(--civic-accent); color: white; border: none; cursor: pointer; padding: 6px 12px; font-size: 0.8rem;">
+            📤 Share Score
+        </button>
+    </div>
+
+    <!-- Readiness Score Section -->
+    <div class="card mb-2xl" style="text-align: center;">
+        <h2 class="headline" style="font-size: 1.25rem; margin-bottom: var(--space-lg);">Your Readiness Score</h2>
+        
+        <div class="gauge-container mb-lg">
+            <svg class="gauge-svg" viewBox="0 0 120 120">
+                <circle class="gauge-bg" cx="60" cy="60" r="50"></circle>
+                <circle class="gauge-value" cx="60" cy="60" r="50" stroke-dasharray="0 314"></circle>
+            </svg>
+            <div class="gauge-text-container">
+                <div class="gauge-score" id="score-display">0</div>
+                <div class="gauge-label">Out of 100</div>
+            </div>
+        </div>
+        
+        <p class="body" style="color: var(--civic-gray); max-width: 400px; margin: 0 auto;" id="score-message">
+            Loading your readiness score...
+        </p>
+    </div>
+
+    <!-- Badges Section -->
+    <h2 class="headline" style="font-size: 1.25rem; margin-bottom: var(--space-md);">Achievements</h2>
+    <div class="badges-grid" id="badges-container">
+        <!-- Injected via JS -->
+    </div>
+</div>
+
+<script>
+    // Constants for gauge circle (radius = 50, circumference = 2 * PI * 50 ≈ 314)
+    const CIRCUMFERENCE = 314;
+
+    const ALL_BADGES = [
+        { id: 'first_visit', icon: '🌱', title: 'First Step', desc: 'Started your voter journey.', unlocked: true },
+        { id: 'quiz_master', icon: '🧠', title: 'Quiz Master', desc: 'Aced the election quiz.', unlocked: false },
+        { id: 'evm_expert', icon: '🖥️', title: 'EVM Expert', desc: 'Practiced on the EVM simulator.', unlocked: false },
+        { id: 'ai_explorer', icon: '🤖', title: 'AI Explorer', desc: 'Asked the AI assistant 5 questions.', unlocked: false },
+        { id: 'timeline_ready', icon: '📅', title: 'Timeline Ready', desc: 'Generated your personalized timeline.', unlocked: false }
+    ];
+
+    function calculateScore() {
+        // In a real app, this would be derived from /api/journey
+        let score = 20; // Base score for visiting
+        
+        // Check localStorage to see what they've done
+        if (localStorage.getItem('evm_voted')) {
+            score += 20;
+            ALL_BADGES.find(b => b.id === 'evm_expert').unlocked = true;
+        }
+        if (localStorage.getItem('timeline_generated')) {
+            score += 30;
+            ALL_BADGES.find(b => b.id === 'timeline_ready').unlocked = true;
+        }
+        if (localStorage.getItem('quiz_completed')) {
+            score += 30;
+            ALL_BADGES.find(b => b.id === 'quiz_master').unlocked = true;
+        }
+        if (parseInt(localStorage.getItem('ai_questions_asked') || '0') >= 5) {
+            score += 20;
+            ALL_BADGES.find(b => b.id === 'ai_explorer').unlocked = true;
+        }
+
+        return Math.min(score, 100);
+    }
+
+    function renderBadges() {
+        const container = document.getElementById('badges-container');
+        container.innerHTML = '';
+        
+        ALL_BADGES.forEach(badge => {
+            const el = document.createElement('div');
+            el.className = `badge-card ${badge.unlocked ? '' : 'locked'}`;
+            el.innerHTML = `
+                <div class="badge-icon">${badge.icon}</div>
+                <div class="badge-title">${badge.title}</div>
+                <div class="badge-desc">${badge.unlocked ? badge.desc : 'Locked'}</div>
+            `;
+            container.appendChild(el);
+        });
+    }
+
+    function updateGauge(score) {
+        const gaugeValue = document.querySelector('.gauge-value');
+        const dashValue = (score / 100) * CIRCUMFERENCE;
+        
+        // Animate stroke
+        setTimeout(() => {
+            gaugeValue.style.strokeDasharray = `${dashValue} ${CIRCUMFERENCE}`;
+        }, 100);
+
+        // Animate numbers
+        const scoreDisplay = document.getElementById('score-display');
+        let current = 0;
+        const interval = setInterval(() => {
+            if (current >= score) {
+                clearInterval(interval);
+                scoreDisplay.innerText = score;
+            } else {
+                current += 2;
+                scoreDisplay.innerText = current;
+            }
+        }, 20);
+
+        // Update message
+        const msgEl = document.getElementById('score-message');
+        if (score < 40) msgEl.innerText = "You've taken the first steps! Check out the Timeline or Quiz to boost your score.";
+        else if (score < 80) msgEl.innerText = "You are well on your way to being election-ready!";
+        else msgEl.innerText = "Amazing! You are fully prepared for election day.";
+    }
+
+    async function shareScore() {
+        const score = document.getElementById('score-display').innerText;
+        const text = `I just scored ${score}/100 on my Voter Readiness profile! Check out ElectionGuide to get ready for election day. 🗳️`;
+        
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: 'My Voter Readiness Score',
+                    text: text,
+                    url: window.location.origin
+                });
+            } catch (err) {
+                console.log('Share canceled', err);
+            }
+        } else {
+            navigator.clipboard.writeText(text);
+            alert("Score copied to clipboard!");
+        }
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+        const score = calculateScore();
+        updateGauge(score);
+        renderBadges();
+    });
+</script>
+{% endblock %}
