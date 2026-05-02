@@ -30,7 +30,6 @@ google-cloud-language
 
 # Data
 PyYAML
-motor
 
 # Testing (dev)
 pytest

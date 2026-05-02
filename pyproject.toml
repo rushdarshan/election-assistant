@@ -1,3 +1,9 @@
+[project]
+name = "election-assistant"
+version = "2.0.0"
+description = "Election Process Education Assistant — AI-powered civic engagement platform"
+requires-python = ">=3.12"
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
