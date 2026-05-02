@@ -1,0 +1,23 @@
+{% if chat_history %}
+{% for msg in chat_history %}
+<div class="chat-msg {% if msg.role == 'user' %}chat-user{% else %}chat-assistant{% endif %}">
+    {% if msg.role == 'user' %}
+        {{ msg.content }}
+    {% else %}
+        {{ msg.content|safe }}
+    {% endif %}
+</div>
+{% endfor %}
+{% endif %}
+
+{% if messages %}
+{% for msg in messages %}
+<div class="chat-msg animate-fade-in-up {% if msg.role == 'user' %}chat-user{% else %}chat-assistant{% endif %}">
+    {% if msg.role == 'user' %}
+        {{ msg.content }}
+    {% else %}
+        {{ msg.content|safe }}
+    {% endif %}
+</div>
+{% endfor %}
+{% endif %}

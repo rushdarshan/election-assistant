@@ -1,0 +1,290 @@
+{% extends "base.html" %}
+{% block title %}Voter Readiness Quiz — Election Process Guide{% endblock %}
+
+{% block extra_css %}
+.quiz-landing {
+    padding: var(--space-2xl) 0 var(--space-3xl);
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.quiz-value-strip {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    border: 1px solid var(--civic-border);
+    border-radius: var(--radius);
+    background: var(--civic-white);
+    box-shadow: var(--shadow);
+    margin-bottom: var(--space-2xl);
+    overflow: hidden;
+}
+.value-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--space-lg) var(--space-md);
+    gap: 4px;
+}
+.value-num {
+    font-family: 'Literata', serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--civic-deep);
+    line-height: 1;
+}
+.value-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--civic-gray);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-align: center;
+}
+.value-divider {
+    width: 1px;
+    height: 48px;
+    background: var(--civic-border);
+    flex-shrink: 0;
+}
+
+.quiz-form-card {
+    background: var(--civic-white);
+    padding: var(--space-2xl);
+    border-radius: var(--radius);
+    border: 1px solid var(--civic-border);
+    box-shadow: var(--shadow-lg);
+}
+
+.quiz-form-card .form-group {
+    margin-bottom: var(--space-xl);
+}
+
+.quiz-form-card .form-group label {
+    display: block;
+    font-weight: 600;
+    color: var(--civic-deep);
+    margin-bottom: var(--space-sm);
+    font-size: 0.95rem;
+}
+
+.quiz-form-card select,
+.quiz-form-card input[type="number"] {
+    width: 100%;
+    padding: var(--space-md);
+    border: 2px solid var(--civic-border);
+    border-radius: var(--radius-sm);
+    font-size: 1.05rem;
+    font-family: inherit;
+    background: var(--civic-light);
+    color: var(--civic-deep);
+    transition: all var(--motion-quick);
+}
+
+.quiz-form-card select:focus,
+.quiz-form-card input[type="number"]:focus {
+    outline: none;
+    border-color: var(--civic-accent);
+    background: var(--civic-white);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--civic-accent) 20%, transparent);
+}
+
+.quiz-start-btn {
+    width: 100%;
+    padding: var(--space-lg);
+    background: var(--civic-accent);
+    color: #FFFFFF;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all var(--motion-quick);
+    font-family: inherit;
+    margin-top: var(--space-sm);
+}
+
+.quiz-start-btn:hover {
+    background: color-mix(in srgb, var(--civic-accent) 90%, black);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.quiz-difficulty-note {
+    font-size: 0.85rem;
+    color: var(--civic-gray);
+    margin-top: var(--space-sm);
+}
+
+@media (max-width: 639px) {
+    .quiz-form-card { padding: var(--space-xl); }
+    .quiz-value-strip { flex-direction: column; }
+    .value-divider { width: 100%; height: 1px; }
+    .value-item { padding: var(--space-md); }
+}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <section class="quiz-landing">
+        <div class="hero-action-card animate-fade-in-up" style="text-align: center; margin-bottom: var(--space-2xl);">
+            <div class="flex-row items-center gap-sm mb-sm" style="justify-content: center;">
+                <svg class="icon" style="color: var(--civic-accent);"><use href="#icon-quiz"></use></svg>
+                <div class="jurisdiction-label mb-0">Knowledge Check</div>
+            </div>
+            <h1>Test Your Voting Knowledge</h1>
+            <p class="body" style="color: var(--civic-gray-light); max-width: 56ch; margin-left: auto; margin-right: auto;">Five questions. Category-scored results. You'll see exactly where your knowledge is solid and where it isn't.</p>
+        </div>
+
+        <div class="quiz-value-strip animate-fade-in-up" style="animation-delay: 80ms;">
+            <div class="value-item">
+                <span class="value-num headline">5</span>
+                <span class="value-label label">questions, ~3 min</span>
+            </div>
+            <div class="value-divider" aria-hidden="true"></div>
+            <div class="value-item">
+                <span class="value-num headline">Score</span>
+                <span class="value-label label">by category</span>
+            </div>
+            <div class="value-divider" aria-hidden="true"></div>
+            <div class="value-item">
+                <span class="value-num headline">Gaps</span>
+                <span class="value-label label">flagged for review</span>
+            </div>
+        </div>
+
+        <form method="POST" action="/quiz/start" class="quiz-form-card animate-fade-in-up" style="animation-delay: 160ms;">
+            <div class="form-group">
+                <label for="quiz-country" class="label">Country</label>
+                <select name="country" id="quiz-country" required onchange="updateQuizStates()">
+                    <option value="US">United States</option>
+                    <option value="IN">India</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="quiz-state" class="label">State / Region</label>
+                <select name="state" id="quiz-state" required>
+                    <option value="">Select your state...</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="quiz-category" class="label">Category (Optional)</label>
+                <select name="category" id="quiz-category">
+                    <option value="">All categories</option>
+                    <option value="registration">Registration & Eligibility</option>
+                    <option value="voting">Voting Methods</option>
+                    <option value="deadline">Key Deadlines</option>
+                    <option value="security">Election Security</option>
+                    <option value="civics">Civics</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="quiz-difficulty" class="label">Difficulty Level</label>
+                <select name="difficulty" id="quiz-difficulty">
+                    <option value="mixed">Mixed (Recommended)</option>
+                    <option value="easy">Easy</option>
+                    <option value="medium">Medium</option>
+                    <option value="hard">Hard</option>
+                </select>
+                <p class="metadata mt-md">
+                    <svg class="icon icon-sm"><use href="#icon-info"></use></svg>
+                    Mixed difficulty gives you a balanced assessment
+                </p>
+            </div>
+
+            <div class="form-group">
+                <label for="quiz-count" class="label">Number of Questions</label>
+                <input type="number" name="count" id="quiz-count" value="5" min="2" max="10">
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: var(--space-lg); font-size: 1.1rem;">
+                Start Quiz
+                <svg class="icon icon-sm" style="margin-left: 6px;"><use href="#icon-chevron-right"></use></svg>
+            </button>
+        </form>
+    </section>
+</div>
+
+<script>
+const usStates = [
+    {code: "AL", name: "Alabama"}, {code: "AK", name: "Alaska"}, {code: "AZ", name: "Arizona"},
+    {code: "AR", name: "Arkansas"}, {code: "CA", name: "California"}, {code: "CO", name: "Colorado"},
+    {code: "CT", name: "Connecticut"}, {code: "DE", name: "Delaware"}, {code: "FL", name: "Florida"},
+    {code: "GA", name: "Georgia"}, {code: "HI", name: "Hawaii"}, {code: "ID", name: "Idaho"},
+    {code: "IL", name: "Illinois"}, {code: "IN", name: "Indiana"}, {code: "IA", name: "Iowa"},
+    {code: "KS", name: "Kansas"}, {code: "KY", name: "Kentucky"}, {code: "LA", name: "Louisiana"},
+    {code: "ME", name: "Maine"}, {code: "MD", name: "Maryland"}, {code: "MA", name: "Massachusetts"},
+    {code: "MI", name: "Michigan"}, {code: "MN", name: "Minnesota"}, {code: "MS", name: "Mississippi"},
+    {code: "MO", name: "Missouri"}, {code: "MT", name: "Montana"}, {code: "NE", name: "Nebraska"},
+    {code: "NV", name: "Nevada"}, {code: "NH", name: "New Hampshire"}, {code: "NJ", name: "New Jersey"},
+    {code: "NM", name: "New Mexico"}, {code: "NY", name: "New York"}, {code: "NC", name: "North Carolina"},
+    {code: "ND", name: "North Dakota"}, {code: "OH", name: "Ohio"}, {code: "OK", name: "Oklahoma"},
+    {code: "OR", name: "Oregon"}, {code: "PA", name: "Pennsylvania"}, {code: "RI", name: "Rhode Island"},
+    {code: "SC", name: "South Carolina"}, {code: "SD", name: "South Dakota"}, {code: "TN", name: "Tennessee"},
+    {code: "TX", name: "Texas"}, {code: "UT", name: "Utah"}, {code: "VT", name: "Vermont"},
+    {code: "VA", name: "Virginia"}, {code: "WA", name: "Washington"}, {code: "WV", name: "West Virginia"},
+    {code: "WI", name: "Wisconsin"}, {code: "WY", name: "Wyoming"}
+];
+
+const inStates = [
+    {code: "AP", name: "Andhra Pradesh"},
+    {code: "AR", name: "Arunachal Pradesh"},
+    {code: "AS", name: "Assam"},
+    {code: "BR", name: "Bihar"},
+    {code: "CG", name: "Chhattisgarh"},
+    {code: "DL", name: "Delhi"},
+    {code: "GA", name: "Goa"},
+    {code: "GJ", name: "Gujarat"},
+    {code: "HR", name: "Haryana"},
+    {code: "HP", name: "Himachal Pradesh"},
+    {code: "JH", name: "Jharkhand"},
+    {code: "KA", name: "Karnataka"},
+    {code: "KL", name: "Kerala"},
+    {code: "MH", name: "Maharashtra"},
+    {code: "MP", name: "Madhya Pradesh"},
+    {code: "MN", name: "Manipur"},
+    {code: "ML", name: "Meghalaya"},
+    {code: "MZ", name: "Mizoram"},
+    {code: "NL", name: "Nagaland"},
+    {code: "OR", name: "Odisha"},
+    {code: "PB", name: "Punjab"},
+    {code: "RJ", name: "Rajasthan"},
+    {code: "SK", name: "Sikkim"},
+    {code: "TN", name: "Tamil Nadu"},
+    {code: "TR", name: "Tripura"},
+    {code: "TG", name: "Telangana"},
+    {code: "UP", name: "Uttar Pradesh"},
+    {code: "UK", name: "Uttarakhand"},
+    {code: "WB", name: "West Bengal"},
+    {code: "AN", name: "Andaman & Nicobar (UT)"},
+    {code: "CH", name: "Chandigarh (UT)"},
+    {code: "DN", name: "Dadra & Nagar Haveli (UT)"},
+    {code: "DD", name: "Daman & Diu (UT)"},
+    {code: "JK", name: "Jammu & Kashmir (UT)"},
+    {code: "LD", name: "Lakshadweep (UT)"},
+    {code: "LA", name: "Ladakh (UT)"},
+    {code: "PY", name: "Puducherry (UT)"}
+];
+
+function updateQuizStates() {
+    const country = document.getElementById('quiz-country').value;
+    const stateSelect = document.getElementById('quiz-state');
+    stateSelect.innerHTML = '<option value="">Select your state...</option>';
+
+    const states = country === 'IN' ? inStates : usStates;
+    states.forEach(s => {
+        const option = document.createElement('option');
+        option.value = s.code;
+        option.textContent = s.name;
+        stateSelect.appendChild(option);
+    });
+}
+
+// Initialize on page load
+updateQuizStates();
+</script>
+{% endblock %}

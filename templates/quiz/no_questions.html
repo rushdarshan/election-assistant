@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}No Questions Available — Voter Quiz{% endblock %}
+
+{% block extra_css %}
+.no-questions-page {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: var(--space-3xl) var(--space-lg);
+    text-align: center;
+}
+.no-questions-card {
+    background: var(--civic-white);
+    border: 1px solid var(--civic-border);
+    border-radius: var(--radius);
+    padding: var(--space-3xl) var(--space-2xl);
+    box-shadow: var(--shadow);
+}
+.no-questions-card h1 {
+    font-size: 1.5rem;
+    margin-bottom: var(--space-md);
+}
+.no-questions-card p {
+    color: var(--civic-gray);
+    margin-bottom: var(--space-xl);
+    line-height: 1.6;
+}
+{% endblock %}
+
+{% block content %}
+<div class="no-questions-page">
+    <div class="no-questions-card animate-fade-in-up">
+        <svg class="icon" style="width:48px;height:48px;color:var(--civic-warn);margin-bottom:var(--space-lg)"><use href="#icon-warning"></use></svg>
+        <h1>No Questions Available</h1>
+        <p>We don't have quiz questions matching your selection yet{% if state %} for <strong>{{ state }}</strong>{% endif %}. Try a different state or category.</p>
+        <a href="/quiz" class="btn btn-primary">Back to Quiz Setup</a>
+    </div>
+</div>
+{% endblock %}

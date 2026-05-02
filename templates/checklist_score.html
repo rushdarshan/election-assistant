@@ -1,0 +1,108 @@
+<div class="score-sidebar-inner animate-fade-in-up">
+    <div class="score-header">
+        <span class="label">Preparation Score</span>
+        <span class="score-value {{ color }}">{{ score.overall_score }}%</span>
+    </div>
+
+    <div class="score-track-wrap">
+        <div class="score-track">
+            <div class="score-fill {{ color }}" style="width: {{ score.overall_score }}%;"></div>
+        </div>
+        <div class="score-track-labels">
+            <span>0</span><span>50</span><span>100</span>
+        </div>
+    </div>
+
+    {% if score.next_steps %}
+    <div class="next-steps-section">
+        <p class="label mb-sm">Still to do</p>
+        <ul class="steps-ul">
+            {% for step in score.next_steps %}
+            <li class="body" style="font-size: 0.88rem;">{{ step }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% else %}
+    <p class="all-done-msg flex-row items-center gap-sm">
+        <svg class="icon icon-sm"><use href="#icon-success"></use></svg>
+        <span>All items complete.</span>
+    </p>
+    {% endif %}
+</div>
+
+<style>
+.score-sidebar-inner {
+    background: var(--civic-white);
+    border: 1px solid var(--civic-border);
+    border-radius: var(--radius);
+    padding: var(--space-xl);
+    box-shadow: var(--shadow);
+}
+.score-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: var(--space-md);
+}
+.score-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    font-family: 'Literata', serif;
+    font-variant-numeric: tabular-nums;
+}
+.score-track-wrap { margin-bottom: var(--space-xl); }
+.score-track {
+    height: 8px;
+    background: var(--civic-light);
+    border: 1px solid var(--civic-border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: var(--space-xs);
+}
+.score-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 500ms cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+.score-fill.readiness-excellent { background: var(--civic-success); }
+.score-fill.readiness-good { background: color-mix(in oklab, var(--civic-success) 70%, var(--civic-accent)); }
+.score-fill.readiness-fair { background: var(--civic-warn); }
+.score-fill.readiness-needs-work { background: var(--civic-danger); }
+
+.score-value.readiness-excellent { color: var(--civic-success); }
+.score-value.readiness-good { color: color-mix(in oklab, var(--civic-success) 70%, var(--civic-accent)); }
+.score-value.readiness-fair { color: var(--civic-warn); }
+.score-value.readiness-needs-work { color: var(--civic-danger); }
+
+.score-track-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.7rem;
+    color: var(--civic-gray);
+    font-weight: 600;
+}
+.steps-ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+.steps-ul li {
+    padding-left: var(--space-md);
+    position: relative;
+}
+.steps-ul li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: var(--civic-accent);
+}
+.all-done-msg {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--civic-success);
+    margin: 0;
+}
+</style>

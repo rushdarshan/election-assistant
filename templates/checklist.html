@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}Smart Checklist — Election Process Guide{% endblock %}
+
+{% block extra_css %}
+/* ── Layout: Two-column with sticky score, generous breathing room ── */
+.checklist-page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: var(--space-2xl) var(--space-lg) var(--space-3xl);
+}
+
+.checklist-layout {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: var(--space-xl);
+    align-items: start;
+    margin-top: var(--space-xl);
+}
+
+/* ── Distill: Clean item list without card wrapper noise ── */
+.checklist-items {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.checklist-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-md);
+    padding: var(--space-lg);
+    border-bottom: 1px solid var(--civic-border);
+    cursor: pointer;
+    transition: background var(--motion-quick);
+    line-height: 1.5;
+    font-weight: 500;
+    color: var(--civic-deep);
+}
+.checklist-item:first-child {
+    border-top: 1px solid var(--civic-border);
+}
+.checklist-item:hover {
+    background: var(--civic-accent-lightest);
+}
+
+.checklist-item input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    accent-color: var(--civic-accent);
+    cursor: pointer;
+}
+
+.checklist-item.is-checked {
+    color: var(--civic-gray);
+    text-decoration: line-through;
+    text-decoration-color: var(--civic-border);
+}
+
+/* ── Score sidebar ── */
+.score-sidebar {
+    position: sticky;
+    top: 80px;
+}
+
+/* ── Harden: Empty state when no items ── */
+.checklist-empty {
+    text-align: center;
+    padding: var(--space-3xl) var(--space-lg);
+    color: var(--civic-gray);
+}
+.checklist-empty .empty-icon { font-size: 2.5rem; margin-bottom: var(--space-md); }
+
+@media (max-width: 639px) {
+    .checklist-layout {
+        grid-template-columns: 1fr;
+    }
+    .score-sidebar {
+        position: static;
+        order: -1;
+    }
+}
+{% endblock %}
+
+{% block content %}
+<div class="checklist-page">
+    <div class="hero-action-card animate-fade-in-up">
+        <div class="flex-row items-center gap-sm mb-sm">
+            <svg class="icon" style="color: var(--civic-accent);"><use href="#icon-checklist"></use></svg>
+            <div class="jurisdiction-label mb-0">Readiness</div>
+        </div>
+        <h1>Smart Checklist</h1>
+        <p class="body" style="color: var(--civic-gray-light); max-width: 50ch; margin-left: auto; margin-right: auto;">Track your voting preparations. Check items off as you go — your readiness score updates live.</p>
+    </div>
+
+    {% if items %}
+    <div class="checklist-layout">
+        <div class="checklist-items" role="list" aria-label="Voting preparation checklist">
+            {% for item in items %}
+            <label class="checklist-item {% if state.get(item.id) %}is-checked{% endif %}" role="listitem">
+                <input type="checkbox" name="item_id" value="{{ item.id }}"
+                       {% if state.get(item.id) %}checked{% endif %}
+                       hx-post="/checklist/toggle/{{ item.id }}" hx-target="#score-container" hx-swap="innerHTML"
+                       aria-label="{{ item.text }}">
+                <span class="body">{{ item.text }}</span>
+            </label>
+            {% endfor %}
+        </div>
+        <div id="score-container" class="score-sidebar">
+            {% include "checklist_score.html" %}
+        </div>
+    </div>
+    {% else %}
+    <div class="checklist-empty animate-fade-in-up">
+        <div class="empty-icon" aria-hidden="true"><svg class="icon" style="width: 3rem; height: 3rem; color: var(--civic-border);"><use href="#icon-checklist"></use></svg></div>
+        <p class="body">No checklist items available. Complete your voter journey first to generate a personalized checklist.</p>
+        <a href="/wizard" class="btn btn-primary" style="margin-top: var(--space-lg);">
+            Start Journey
+            <svg class="icon icon-sm" style="margin-left: 6px;"><use href="#icon-chevron-right"></use></svg>
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

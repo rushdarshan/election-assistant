@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Something Went Wrong — Election Process Guide{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 560px; margin: 12vh auto; padding: 0 var(--space-lg); text-align: center;">
+    <div class="hero-action-card">
+        <div style="font-size: 3.5rem; margin-bottom: var(--space-md);" aria-hidden="true">⚠️</div>
+        <h1 style="font-size: 1.8rem;">Something Went Wrong</h1>
+        <p style="font-size: 1.05rem; color: var(--civic-gray-light); margin-bottom: var(--space-xl); max-width: 45ch; margin-left: auto; margin-right: auto;">
+            We encountered an unexpected error. This has been logged and we'll look into it.
+        </p>
+        <div style="display: flex; gap: var(--space-md); justify-content: center; flex-wrap: wrap;">
+            <a href="/" class="btn btn-primary" style="min-width: 140px;">Go Home</a>
+            <button onclick="window.location.reload()" class="btn btn-secondary" style="min-width: 140px;">Try Again</button>
+        </div>
+    </div>
+</div>
+{% endblock %}

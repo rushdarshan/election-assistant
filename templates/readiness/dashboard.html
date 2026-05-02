@@ -1,0 +1,296 @@
+{% extends "base.html" %}
+{% block title %}Your Voter Readiness — Election Process Guide{% endblock %}
+
+{% block extra_css %}
+.readiness-page {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: var(--space-2xl) var(--space-lg) var(--space-3xl);
+}
+
+/* ── Hero status strip (replaces circular gauge) ── */
+.readiness-hero {
+    margin-bottom: var(--space-2xl);
+}
+.readiness-score-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-md);
+}
+.readiness-score-num {
+    font-family: 'Literata', serif;
+    font-size: clamp(2.5rem, 6vw, 3.5rem);
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+.readiness-score-num.excellent { color: var(--civic-success); }
+.readiness-score-num.good { color: #84cc16; }
+.readiness-score-num.fair { color: var(--civic-warn); }
+.readiness-score-num.needs-work { color: var(--civic-danger); }
+
+.readiness-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-md);
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+.readiness-status-pill.excellent { background: var(--civic-success-bg); color: var(--civic-success); }
+.readiness-status-pill.good { background: #f0fdf4; color: #4d7c0f; }
+.readiness-status-pill.fair { background: var(--civic-warn-bg); color: var(--civic-warn); }
+.readiness-status-pill.needs-work { background: var(--civic-danger-bg); color: var(--civic-danger); }
+
+.readiness-track {
+    width: 100%;
+    height: 10px;
+    background: var(--civic-border);
+    border-radius: 5px;
+    overflow: hidden;
+}
+.readiness-fill {
+    height: 100%;
+    border-radius: 5px;
+    transition: width 600ms cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+.readiness-fill.excellent { background: var(--civic-success); }
+.readiness-fill.good { background: #84cc16; }
+.readiness-fill.fair { background: var(--civic-warn); }
+.readiness-fill.needs-work { background: var(--civic-danger); }
+
+/* ── Dimension table (replaces 3-card grid) ── */
+.dim-table {
+    margin: var(--space-2xl) 0;
+    border: 1px solid var(--civic-border);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+.dim-row {
+    display: grid;
+    grid-template-columns: 140px 1fr 56px;
+    align-items: center;
+    gap: var(--space-lg);
+    padding: var(--space-lg) var(--space-xl);
+    border-bottom: 1px solid var(--civic-border);
+}
+.dim-row:last-child { border-bottom: none; }
+.dim-row:nth-child(odd) { background: var(--civic-white); }
+.dim-row:nth-child(even) { background: var(--civic-light); }
+
+.dim-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--civic-deep);
+}
+.dim-sub {
+    font-size: 0.8rem;
+    color: var(--civic-gray);
+    line-height: 1.4;
+    margin-top: 2px;
+}
+.dim-mini-track {
+    height: 6px;
+    background: var(--civic-border);
+    border-radius: 3px;
+    overflow: hidden;
+}
+.dim-mini-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: var(--civic-accent);
+    transition: width 500ms cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+.dim-pct {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--civic-deep);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Next Steps ── */
+.next-steps-card {
+    background: var(--civic-white);
+    border: 1px solid var(--civic-border);
+    border-radius: var(--radius);
+    padding: var(--space-xl) var(--space-2xl);
+    margin: var(--space-2xl) 0;
+}
+.next-steps-card h3 {
+    font-family: 'Literata', serif;
+    font-size: 1.1rem;
+    color: var(--civic-deep);
+    margin-bottom: var(--space-lg);
+    font-weight: 600;
+}
+.steps-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    counter-reset: step-counter;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+.steps-list li {
+    counter-increment: step-counter;
+    padding-left: calc(var(--space-lg) + var(--space-sm));
+    position: relative;
+    color: var(--civic-deep);
+    line-height: 1.6;
+    font-size: 0.95rem;
+}
+.steps-list li::before {
+    content: counter(step-counter);
+    position: absolute;
+    left: 0;
+    top: 0.25em;
+    width: 20px;
+    height: 20px;
+    background: var(--civic-accent-lightest);
+    border: 1.5px solid var(--civic-accent);
+    border-radius: 50%;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--civic-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ── Action row ── */
+.action-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-md);
+    margin-top: var(--space-2xl);
+}
+.action-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-md) var(--space-xl);
+    background: var(--civic-white);
+    border: 1.5px solid var(--civic-border);
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    color: var(--civic-deep);
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all var(--motion-quick) var(--ease-out);
+}
+.action-pill:hover {
+    border-color: var(--civic-accent);
+    color: var(--civic-accent);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+@media (max-width: 639px) {
+    .dim-row { grid-template-columns: 1fr 36px; }
+    .dim-row .dim-mini-track { display: none; }
+    .readiness-score-row { flex-direction: column; align-items: flex-start; gap: var(--space-md); }
+    .action-row { flex-direction: column; }
+    .action-pill { width: 100%; justify-content: center; }
+}
+{% endblock %}
+
+{% block content %}
+<div class="readiness-page">
+    <div class="hero-action-card animate-fade-in-up">
+        <div class="flex-row items-center gap-sm mb-sm">
+            <svg class="icon" style="color: var(--civic-accent);"><use href="#icon-readiness"></use></svg>
+            <div class="jurisdiction-label mb-0">Progress Tracker</div>
+        </div>
+        <h1>Voter Readiness</h1>
+        <p class="body" style="color: var(--civic-gray-light); max-width: 55ch;">Track where you stand across registration, your voting plan, and process knowledge.</p>
+    </div>
+
+    <!-- Score strip (replaces circular gauge hero-metric) -->
+    <div class="readiness-hero animate-fade-in-up" style="animation-delay: 60ms;">
+        <div class="readiness-score-row">
+            <div>
+                <div class="readiness-score-num {{ color_class }}">{{ readiness.overall_score|int }}%</div>
+                <div class="label" style="font-size: 0.85rem;">overall readiness</div>
+            </div>
+            <span class="readiness-status-pill {{ color_class }}">
+                {% if color_class == 'excellent' %}<svg class="icon icon-sm"><use href="#icon-success"></use></svg>
+                {% elif color_class == 'good' %}<svg class="icon icon-sm"><use href="#icon-success"></use></svg>
+                {% elif color_class == 'fair' %}<svg class="icon icon-sm"><use href="#icon-warning"></use></svg>
+                {% else %}<svg class="icon icon-sm"><use href="#icon-warning"></use></svg>
+                {% endif %}
+                {{ readiness.label if readiness.label else "In Progress" }}
+            </span>
+        </div>
+        <div class="readiness-track">
+            <div class="readiness-fill {{ color_class }}" style="width: {{ readiness.overall_score }}%;"></div>
+        </div>
+    </div>
+
+    <!-- Dimension table -->
+    <div class="dim-table animate-fade-in-up" style="animation-delay: 120ms;">
+        <div class="dim-row">
+            <div>
+                <div class="dim-name headline" style="font-size: 0.95rem;">Registration</div>
+                <div class="dim-sub body">Voter roll status verified</div>
+            </div>
+            <div class="dim-mini-track">
+                <div class="dim-mini-fill" style="width: {{ readiness.registration_ready }}%;"></div>
+            </div>
+            <div class="dim-pct highlight-accent">{{ readiness.registration_ready|int }}%</div>
+        </div>
+        <div class="dim-row">
+            <div>
+                <div class="dim-name headline" style="font-size: 0.95rem;">Voting Plan</div>
+                <div class="dim-sub body">How and where to vote</div>
+            </div>
+            <div class="dim-mini-track">
+                <div class="dim-mini-fill" style="width: {{ readiness.voting_ready }}%;"></div>
+            </div>
+            <div class="dim-pct highlight-accent">{{ readiness.voting_ready|int }}%</div>
+        </div>
+        <div class="dim-row">
+            <div>
+                <div class="dim-name headline" style="font-size: 0.95rem;">Knowledge</div>
+                <div class="dim-sub body">Process and rules familiarity</div>
+            </div>
+            <div class="dim-mini-track">
+                <div class="dim-mini-fill" style="width: {{ readiness.knowledge_ready }}%;"></div>
+            </div>
+            <div class="dim-pct highlight-accent">{{ readiness.knowledge_ready|int }}%</div>
+        </div>
+    </div>
+
+    <!-- Next Steps -->
+    {% if readiness.next_steps %}
+    <div class="next-steps-card animate-fade-in-up" style="animation-delay: 200ms;">
+        <h3 class="headline" style="font-size: 1.1rem; margin-bottom: var(--space-lg);">What to do next</h3>
+        <ol class="steps-list">
+            {% for step in readiness.next_steps %}
+            <li class="body">{{ step }}</li>
+            {% endfor %}
+        </ol>
+    </div>
+    {% endif %}
+
+    <!-- Action row -->
+    <div class="action-row animate-fade-in-up" style="animation-delay: 280ms;">
+        <a href="/wizard" class="action-pill">
+            <svg class="icon icon-sm"><use href="#icon-timeline"></use></svg>
+            Build Timeline
+        </a>
+        <a href="/quiz" class="action-pill">
+            <svg class="icon icon-sm"><use href="#icon-quiz"></use></svg>
+            Take Quiz
+        </a>
+        <a href="/chat" class="action-pill">
+            <svg class="icon icon-sm"><use href="#icon-chat"></use></svg>
+            Ask a Question
+        </a>
+    </div>
+</div>
+{% endblock %}

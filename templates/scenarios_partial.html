@@ -1,0 +1,57 @@
+{% if result %}
+<div class="solution-card animate-fade-in-up" role="region" aria-labelledby="solution-title-{{ result.scenario_id }}">
+    <h3 class="headline" id="solution-title-{{ result.scenario_id }}" style="font-size: 1.25rem;">{{ result.title }}</h3>
+    <p class="body mb-sm">{{ result.description }}</p>
+    <p class="metadata mb-lg">
+        <svg class="icon icon-sm"><use href="#icon-clock"></use></svg>
+        Estimated time: {{ result.estimated_time }}
+    </p>
+
+    <h4 class="label mb-md">Steps to Resolve</h4>
+    <ol class="solution-steps">
+        {% for step in result.steps %}
+        <li>
+            <span class="step-action">{{ step.action }}</span>
+            <span class="step-details">{{ step.details }}</span>
+            {% if step.link %}
+            <a href="{{ step.link }}" class="step-link" target="_blank" rel="noopener noreferrer">
+                Official Resource
+                <svg class="icon icon-sm"><use href="#icon-external-link"></use></svg>
+            </a>
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ol>
+
+    {% if result.documents_needed %}
+    <h4 class="label mb-sm">Documents Needed</h4>
+    <ul class="documents-list mb-lg">
+        {% for doc in result.documents_needed %}
+        <li>
+            <svg class="icon icon-sm" style="margin-right: 4px; vertical-align: middle;"><use href="#icon-checklist"></use></svg>
+            {{ doc }}
+        </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    {% if result.official_links %}
+    <h4 class="label mb-sm">Official Resources</h4>
+    <ul class="official-links-list mb-lg">
+        {% for link in result.official_links %}
+        <li><a href="{{ link.url }}" target="_blank" rel="noopener noreferrer">{{ link.label }} <svg class="icon icon-sm"><use href="#icon-external-link"></use></svg></a></li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <div class="next-action-box" role="status">
+        <svg class="icon icon-sm" style="margin-right: 6px;"><use href="#icon-success"></use></svg>
+        <strong>Next Action:</strong> {{ result.next_action }}
+    </div>
+</div>
+{% else %}
+<div class="error-message flex-row items-center gap-sm" role="alert">
+    <svg class="icon" style="color: var(--civic-danger);"><use href="#icon-warning"></use></svg>
+    <span>Unable to generate a solution. Please try again or visit <a href="https://www.usa.gov/election-office">usa.gov/election-office</a> for official guidance.</span>
+</div>
+{% endif %}

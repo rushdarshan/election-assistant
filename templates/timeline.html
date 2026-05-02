@@ -1,0 +1,311 @@
+{% extends "base.html" %}
+{% block title %}Your Voter Journey — Election Process Guide{% endblock %}
+
+{% block extra_css %}
+.results-container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: var(--space-3xl) var(--space-lg);
+}
+
+.action-date {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: var(--civic-accent);
+    margin-bottom: var(--space-2xl);
+}
+.provenance {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: 0.85rem;
+    color: var(--civic-gray-light);
+    background: rgba(255,255,255,0.05);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.1);
+    transform: translateX(-4px); /* Optically aligns the text left edge */
+}
+.provenance a {
+    color: #FFFFFF;
+    text-decoration: underline;
+    font-weight: 600;
+    margin-left: var(--space-xs);
+}
+.provenance a:hover { color: var(--civic-accent); }
+
+/* ── Tabs for Depth ── */
+.tabs-nav {
+    display: flex;
+    gap: var(--space-md);
+    border-bottom: 1px solid var(--civic-border);
+    margin-bottom: var(--space-xl);
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.tabs-nav::-webkit-scrollbar { display: none; }
+.tab-btn {
+    background: transparent;
+    border: none;
+    padding: var(--space-md) 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--civic-gray);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    white-space: nowrap;
+    transition: all var(--motion-quick);
+}
+.tab-btn:hover { color: var(--civic-deep); }
+.tab-btn.active {
+    color: var(--civic-accent);
+    border-bottom-color: var(--civic-accent);
+}
+
+.tab-content {
+    display: none;
+    animation: fadeIn var(--motion-standard) var(--ease-out);
+}
+.tab-content.active { display: block; }
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Full Timeline List ── */
+.timeline-list {
+    list-style: none; padding: 0; margin: 0;
+}
+.timeline-item {
+    position: relative;
+    padding-left: var(--space-xl);
+    padding-bottom: var(--space-xl);
+}
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: 7px; top: 24px; bottom: 0;
+    width: 2px; background: var(--civic-border);
+}
+.timeline-item:last-child::before { display: none; }
+.timeline-marker {
+    position: absolute;
+    left: 0; top: 4px;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--civic-white);
+    border: 3px solid var(--civic-border);
+    z-index: 1;
+}
+.timeline-item.next-action .timeline-marker {
+    border-color: var(--civic-accent);
+    background: var(--civic-accent);
+    box-shadow: 0 0 0 4px var(--civic-accent-light);
+}
+.timeline-date {
+    font-size: 0.9rem;
+    color: var(--civic-gray);
+    font-weight: 600;
+    margin-bottom: var(--space-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.timeline-label {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--civic-deep);
+    line-height: 1.3;
+}
+
+/* ── Links & Checklist ── */
+.links-list { list-style: none; padding: 0; margin: 0; }
+.links-list li {
+    padding: var(--space-md);
+    background: var(--civic-white);
+    border: 1px solid var(--civic-border);
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--space-md);
+    font-weight: 500;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.links-list a {
+    color: var(--civic-accent);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+.links-list a:hover { text-decoration: underline; }
+
+.source-tag {
+    display: inline-block;
+    background: var(--civic-light);
+    border: 1px solid var(--civic-border);
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: 4px; font-size: 0.85rem;
+    color: var(--civic-gray); margin-bottom: var(--space-sm);
+    font-family: monospace;
+}
+{% endblock %}
+
+{% block content %}
+<div class="results-container">
+    {% set next_action = timeline.milestones[0] if timeline.milestones else none %}
+    
+    {% if next_action %}
+    <!-- Hero Action Card -->
+    <div class="hero-action-card animate-fade-in-up">
+        <div class="jurisdiction-label">Next Action • {{ timeline.jurisdiction.state }}, {{ timeline.jurisdiction.country }}</div>
+        <h1>{{ next_action.label }}</h1>
+        <div class="action-date">{{ next_action.date }}</div>
+        
+        <div class="provenance">
+            <svg class="icon icon-sm" aria-hidden="true" style="color: var(--civic-accent);"><use href="#icon-readiness"></use></svg>
+            Based on {{ timeline.jurisdiction.state }} election law.
+            {% if timeline.source_notes %}
+            <a href="#sources" onclick="switchTab('sources'); return false;">Verify source</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if timeline.gemini_enrichment %}
+    <!-- AI Live Insights Card -->
+    <div class="card animate-fade-in-up" style="animation-delay: 80ms; margin-bottom: var(--space-xl); background: color-mix(in oklab, var(--civic-white) 97%, var(--stage-4-violet) 3%); border-color: color-mix(in oklab, var(--stage-4-violet) 20%, var(--civic-border));">
+        <div class="flex-row items-center gap-sm mb-md">
+            <svg class="icon" style="color: var(--stage-4-violet);"><use href="#icon-scenarios"></use></svg>
+            <h3 class="headline mb-0" style="font-size: 1rem;">AI Live Insights</h3>
+            <span class="badge badge-gemini">Gemini</span>
+        </div>
+
+        {% if timeline.gemini_enrichment.result_summary %}
+        <p class="body mb-md" style="font-size: 0.95rem;">{{ timeline.gemini_enrichment.result_summary }}</p>
+        {% endif %}
+
+        <div class="grid-stats">
+            {% if timeline.gemini_enrichment.winning_party %}
+            <div class="stat-item">
+                <div class="label">Winning Party</div>
+                <div class="value">{{ timeline.gemini_enrichment.winning_party }}</div>
+            </div>
+            {% endif %}
+
+            {% if timeline.gemini_enrichment.seats_won %}
+            <div class="stat-item">
+                <div class="label">Seats Won</div>
+                <div class="value highlight-accent">{{ timeline.gemini_enrichment.seats_won }}{% if timeline.gemini_enrichment.total_seats %}/{{ timeline.gemini_enrichment.total_seats }}{% endif %}</div>
+            </div>
+            {% endif %}
+
+            {% if timeline.gemini_enrichment.voter_turnout %}
+            <div class="stat-item">
+                <div class="label">Voter Turnout</div>
+                <div class="value highlight-success">{{ timeline.gemini_enrichment.voter_turnout }}</div>
+            </div>
+            {% endif %}
+        </div>
+
+        {% if timeline.gemini_enrichment.source_note %}
+        <p class="metadata mt-md mb-0">
+            <svg class="icon icon-sm" aria-hidden="true" style="vertical-align: middle;"><use href="#icon-info"></use></svg>
+            {{ timeline.gemini_enrichment.source_note }}
+        </p>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Tabs Container -->
+    <div class="animate-fade-in-up" style="animation-delay: 100ms;">
+        <div class="tabs-nav" role="tablist">
+            <button class="tab-btn active" role="tab" aria-selected="true" id="tab-timeline" onclick="switchTab('timeline')">Full Timeline</button>
+            <button class="tab-btn" role="tab" aria-selected="false" id="tab-resources" onclick="switchTab('resources')">Checklist & Links</button>
+            <button class="tab-btn" role="tab" aria-selected="false" id="tab-sources" onclick="switchTab('sources')">Sources</button>
+        </div>
+
+        <!-- Full Timeline Tab -->
+        <div class="tab-content active" id="content-timeline" role="tabpanel" aria-labelledby="tab-timeline">
+            {% if timeline.svg %}
+            <div class="card mb-xl" style="padding: var(--space-md); overflow-x: auto; background: var(--civic-white);">
+                {{ timeline.svg | safe }}
+            </div>
+            {% endif %}
+
+            <ul class="timeline-list">
+                {% for ms in timeline.milestones %}
+                <li class="timeline-item {% if loop.first %}next-action{% endif %}">
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-date">{{ ms.date }}</div>
+                    <div class="timeline-label">{{ ms.label }}</div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Resources Tab -->
+        <div class="tab-content" id="content-resources" role="tabpanel" aria-labelledby="tab-resources">
+            <h3 class="headline mb-md" style="font-size: 1.2rem;">Action Checklist</h3>
+            <ul class="links-list mb-xl">
+                {% for cl in timeline.checklist %}
+                <li>
+                    <span>{{ cl.label }}</span>
+                    {% if cl.link %}
+                    <a href="{{ cl.link }}" target="_blank" rel="noopener">Complete <svg class="icon icon-sm"><use href="#icon-external-link"></use></svg></a>
+                    {% endif %}
+                </li>
+                {% else %}
+                <li class="body" style="color: var(--civic-gray);">No specific actions required at this moment.</li>
+                {% endfor %}
+            </ul>
+
+            <h3 class="headline mb-md" style="font-size: 1.2rem;">Official Resources</h3>
+            <ul class="links-list">
+                {% for ol in timeline.official_links %}
+                <li>
+                    <span>{{ ol.label }}</span>
+                    <a href="{{ ol.url }}" target="_blank" rel="noopener">Visit <svg class="icon icon-sm"><use href="#icon-external-link"></use></svg></a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Sources Tab -->
+        <div class="tab-content" id="content-sources" role="tabpanel" aria-labelledby="tab-sources">
+            <h3 class="headline mb-md" style="font-size: 1.2rem;">Data Provenance</h3>
+            <p class="body mb-lg" style="color: var(--civic-gray);">This timeline was constructed using the following verified sources. Always verify critical deadlines with your local election office.</p>
+            
+            {% if timeline.source_notes %}
+            <div class="flex-column gap-md">
+                {% for sn in timeline.source_notes %}
+                <div class="card" style="padding: var(--space-md);">
+                    <div class="source-tag">{{ sn.source }}</div>
+                    <p class="body mb-0" style="font-size: 0.95rem;">{{ sn.details }}</p>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="body" style="color: var(--civic-gray);">No specific source notes attached.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    function switchTab(tabId) {
+        // Update Buttons
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+            btn.setAttribute('aria-selected', 'false');
+        });
+        const activeBtn = document.getElementById(`tab-${tabId}`);
+        activeBtn.classList.add('active');
+        activeBtn.setAttribute('aria-selected', 'true');
+
+        // Update Content
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.remove('active');
+        });
+        document.getElementById(`content-${tabId}`).classList.add('active');
+    }
+</script>
+{% endblock %}

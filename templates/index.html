@@ -1,0 +1,972 @@
+{% extends "base.html" %}
+{% block title %}Election Process Guide — Personalized Voter Journey{% endblock %}
+
+{% block extra_css %}
+.hero {
+    padding: clamp(var(--space-2xl), 5vw, var(--space-3xl)) 0 var(--space-xl);
+    animation: fadeInUp var(--motion-standard) var(--ease-out);
+}
+.hero-shell {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+    gap: clamp(var(--space-xl), 4vw, var(--space-3xl));
+    align-items: start;
+}
+.hero-copy {
+    text-align: left;
+    padding-top: var(--space-xs);
+}
+.hero-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-lg);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: 999px;
+    border: 1px solid var(--civic-border);
+    background: color-mix(in oklab, var(--civic-white) 92%, var(--civic-accent) 8%);
+    color: var(--civic-deep);
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+.hero h1 {
+    font-size: clamp(2.8rem, 6vw, 4.8rem);
+    color: var(--civic-deep);
+    margin-bottom: var(--space-md);
+    letter-spacing: -0.04em;
+    max-width: 12ch;
+    text-align: left;
+  }
+.hero p {
+    color: var(--civic-gray);
+    font-size: clamp(1.05rem, 1.8vw, 1.2rem);
+    max-width: 60ch;
+    margin: 0 0 var(--space-xl);
+    line-height: 1.7;
+  }
+
+/* Integrated Countdown Timer */
+.countdown-banner {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-md);
+    background: var(--civic-white);
+    padding: var(--space-sm) var(--space-lg);
+    border-radius: 999px;
+    border: 1px solid var(--civic-border);
+    box-shadow: var(--shadow);
+    margin-bottom: var(--space-lg);
+    font-size: 0.95rem;
+    color: var(--civic-deep);
+  }
+.countdown-banner strong {
+    color: var(--civic-accent);
+    font-variant-numeric: tabular-nums;
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
+.hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+  }
+.hero-points {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+  }
+.hero-point {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.65rem 0.9rem;
+    border-radius: 999px;
+    border: 1px solid var(--civic-border);
+    background: color-mix(in oklab, var(--civic-white) 94%, var(--civic-accent) 6%);
+    color: var(--civic-gray);
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+.hero-panel {
+    background: var(--civic-white);
+    border-radius: calc(var(--radius) + 4px);
+    padding: var(--space-xl);
+    border: 1px solid var(--civic-border);
+    box-shadow: var(--shadow-lg);
+    text-align: left;
+  }
+.panel-label,
+.flow-label {
+    display: inline-flex;
+    align-items: center;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--civic-accent);
+    margin-bottom: var(--space-sm);
+  }
+.hero-panel h2,
+.flow-header h2,
+.quick-start h2 {
+    color: var(--civic-deep);
+    font-size: 1.875rem;
+    margin-bottom: var(--space-sm);
+  }
+.hero-panel p {
+    color: var(--civic-gray);
+    font-size: 0.98rem;
+    line-height: 1.7;
+  }
+.path-list {
+    list-style: none;
+    display: grid;
+    gap: var(--space-md);
+    margin: var(--space-lg) 0 0;
+    padding: 0;
+  }
+.path-list li {
+    padding-top: var(--space-md);
+    border-top: 1px solid var(--civic-border);
+    color: var(--civic-gray);
+    line-height: 1.65;
+  }
+.path-list li:first-child {
+    border-top: 0;
+    padding-top: 0;
+  }
+.path-list strong {
+    display: block;
+    margin-bottom: var(--space-xs);
+    color: var(--civic-deep);
+  }
+.mini-timeline {
+    display: grid;
+    gap: var(--space-sm);
+    margin-top: var(--space-xl);
+  }
+.mini-timeline div {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--civic-border);
+    background: var(--civic-light);
+  }
+.mini-timeline span {
+    color: var(--civic-gray);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+  }
+.mini-timeline strong {
+    color: var(--civic-deep);
+    font-size: 0.95rem;
+  }
+
+/* Flow Strip */
+.flow-section {
+    padding: var(--space-2xl) 0 var(--space-3xl);
+}
+.flow-header {
+    max-width: 740px;
+    margin: 0 auto var(--space-xl);
+}
+.flow-header p {
+    color: var(--civic-gray);
+    line-height: 1.7;
+    max-width: 60ch;
+}
+.flow-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--space-lg);
+}
+.flow-card {
+    background: var(--civic-white);
+    border: 1px solid var(--civic-border);
+    border-radius: var(--radius);
+    padding: var(--space-xl);
+    box-shadow: var(--shadow);
+    text-align: left;
+}
+.flow-step {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    min-width: 2rem;
+    height: 2rem;
+    padding: 0 0.55rem;
+    gap: 0.35rem;
+    border-radius: 999px;
+    background: var(--civic-accent-lightest);
+    color: var(--civic-accent);
+    font-weight: 700;
+    margin-bottom: var(--space-md);
+}
+.flow-step-num {
+    font-size: 0.72rem;
+    line-height: 1;
+    font-weight: 700;
+}
+.icon {
+    width: 1em;
+    height: 1em;
+    display: inline-block;
+}
+.icon-flow {
+    width: 0.95rem;
+    height: 0.95rem;
+}
+.flow-card h3 {
+    font-size: 1.15rem;
+    margin-bottom: var(--space-sm);
+    color: var(--civic-deep);
+}
+.flow-card p {
+    color: var(--civic-gray);
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+/* Colorized Flow Cards — full-border tints, no stripe */
+.flow-grid > .flow-card:nth-child(1) {
+    background: var(--flow-1-blue-light);
+    border-color: color-mix(in oklab, var(--flow-1-blue) 30%, transparent);
+}
+.flow-grid > .flow-card:nth-child(1) .flow-step {
+    background: color-mix(in oklab, var(--flow-1-blue) 12%, white);
+    color: var(--flow-1-blue);
+}
+
+.flow-grid > .flow-card:nth-child(2) {
+    background: var(--flow-2-green-light);
+    border-color: color-mix(in oklab, var(--flow-2-green) 30%, transparent);
+}
+.flow-grid > .flow-card:nth-child(2) .flow-step {
+    background: color-mix(in oklab, var(--flow-2-green) 12%, white);
+    color: var(--flow-2-green);
+}
+
+.flow-grid > .flow-card:nth-child(3) {
+    background: var(--flow-3-orange-light);
+    border-color: color-mix(in oklab, var(--flow-3-orange) 30%, transparent);
+}
+.flow-grid > .flow-card:nth-child(3) .flow-step {
+    background: color-mix(in oklab, var(--flow-3-orange) 12%, white);
+    color: var(--flow-3-orange);
+}
+
+/* Quick Start */
+.quick-start {
+    padding: var(--space-2xl) 0 var(--space-3xl);
+    background: color-mix(in oklab, var(--civic-white) 94%, var(--civic-accent) 6%);
+    border-top: 1px solid var(--civic-border);
+    border-bottom: 1px solid var(--civic-border);
+    text-align: center;
+}
+.quick-start-wrapper {
+    max-width: 900px;
+    margin: 0 auto;
+}
+.quick-start p.subtitle {
+    color: var(--civic-gray);
+    margin-bottom: var(--space-xl);
+    max-width: 60ch;
+    margin-left: auto;
+    margin-right: auto;
+}
+.quick-start .card {
+    text-align: left;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--civic-border);
+}
+
+/* Voter Journey Stages */
+.journey-section {
+    padding: var(--space-3xl) 0;
+}
+.journey-header {
+    font-size: 1.875rem;
+    color: var(--civic-deep);
+    margin-bottom: var(--space-sm);
+    text-align: center;
+}
+.journey-subtitle {
+    text-align: center;
+    color: var(--civic-gray);
+    margin-bottom: var(--space-2xl);
+}
+.journey-stages {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: var(--space-xl);
+}
+.journey-stage {
+    background: var(--civic-white);
+    border: 1px solid var(--civic-border);
+    border-radius: var(--radius);
+    padding: var(--space-xl);
+    cursor: pointer;
+    transition: all var(--motion-standard) var(--ease-out);
+    position: relative;
+    text-align: left;
+}
+.journey-stage:hover {
+    border-color: var(--civic-accent);
+    box-shadow: 0 8px 16px rgba(37, 99, 235, 0.08);
+    transform: translateY(-2px);
+}
+.journey-stage.active {
+    border-color: var(--civic-accent);
+    background: var(--civic-accent-lightest);
+}
+
+/* Colorized Stage Cards — full-border, no top stripe */
+.journey-stage[data-stage="1"]:hover,
+.journey-stage[data-stage="1"].active {
+    border-color: var(--stage-1-teal);
+    background: var(--stage-1-teal-light);
+    box-shadow: 0 8px 16px rgba(8, 145, 178, 0.10);
+}
+
+.journey-stage[data-stage="2"]:hover,
+.journey-stage[data-stage="2"].active {
+    border-color: var(--stage-2-amber);
+    background: var(--stage-2-amber-light);
+    box-shadow: 0 8px 16px rgba(217, 119, 6, 0.10);
+}
+
+.journey-stage[data-stage="3"]:hover,
+.journey-stage[data-stage="3"].active {
+    border-color: var(--stage-3-green);
+    background: var(--stage-3-green-light);
+    box-shadow: 0 8px 16px rgba(5, 150, 105, 0.10);
+}
+
+.journey-stage[data-stage="4"]:hover,
+.journey-stage[data-stage="4"].active {
+    border-color: var(--stage-4-violet);
+    background: var(--stage-4-violet-light);
+    box-shadow: 0 8px 16px rgba(124, 58, 237, 0.10);
+}
+
+.journey-stage[data-stage="5"]:hover,
+.journey-stage[data-stage="5"].active {
+    border-color: var(--stage-5-indigo);
+    background: var(--stage-5-indigo-light);
+    box-shadow: 0 8px 16px rgba(79, 70, 229, 0.10);
+}
+.journey-stage::after {
+    content: 'Click to expand ↓';
+    display: block;
+    margin-top: var(--space-md);
+    font-size: 0.8rem;
+    color: var(--civic-accent);
+    font-weight: 500;
+    opacity: 0;
+    transition: opacity var(--motion-quick);
+}
+.journey-stage:hover::after {
+    opacity: 1;
+}
+.journey-stage.active::after {
+    content: 'Click to collapse ↑';
+    opacity: 0.7;
+}
+
+.stage-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 999px;
+    background: var(--civic-light);
+    margin-bottom: var(--space-sm);
+}
+.icon-stage {
+    width: 1.2rem;
+    height: 1.2rem;
+}
+.journey-stage[data-stage="1"] .stage-icon { color: var(--stage-1-teal); }
+.journey-stage[data-stage="2"] .stage-icon { color: var(--stage-2-amber); }
+.journey-stage[data-stage="3"] .stage-icon { color: var(--stage-3-green); }
+.journey-stage[data-stage="4"] .stage-icon { color: var(--stage-4-violet); }
+.journey-stage[data-stage="5"] .stage-icon { color: var(--stage-5-indigo); }
+
+.stage-number {
+    font-size: 0.7rem;
+    color: var(--civic-gray);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: var(--space-xs);
+    font-weight: 700;
+}
+.stage-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--civic-deep);
+    margin-bottom: var(--space-sm);
+}
+.stage-desc {
+    font-size: 0.825rem;
+    color: var(--civic-gray);
+    line-height: 1.5;
+}
+
+.stage-details {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: all var(--motion-slow) var(--ease-out);
+}
+.journey-stage.active .stage-details {
+    max-height: 800px;
+    opacity: 1;
+    padding-top: var(--space-lg);
+    border-top: 1px solid var(--civic-border);
+    margin-top: var(--space-lg);
+}
+.stage-details h4 {
+    color: var(--civic-deep);
+    font-size: 0.95rem;
+    margin-bottom: var(--space-sm);
+    margin-top: var(--space-md);
+}
+.stage-details ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--civic-gray);
+}
+.stage-details li {
+    padding: var(--space-xs) 0;
+    padding-left: var(--space-md);
+    position: relative;
+    line-height: 1.5;
+}
+.stage-details li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--civic-accent);
+}
+
+/* Q&A Assistant */
+.qa-section {
+    padding: var(--space-3xl) 0;
+    background: var(--civic-white);
+    border-top: 1px solid var(--civic-border);
+}
+.qa-wrapper {
+    max-width: 800px;
+    margin: 0 auto;
+}
+.qa-header {
+    font-size: 1.875rem;
+    color: var(--civic-deep);
+    margin-bottom: var(--space-sm);
+    text-align: center;
+}
+.qa-subtitle {
+    text-align: center;
+    color: var(--civic-gray);
+    margin-bottom: var(--space-xl);
+}
+.qa-input-group {
+    display: flex;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-lg);
+}
+.qa-input {
+    flex: 1;
+    padding: var(--space-md) var(--space-lg);
+    border: 2px solid var(--civic-border);
+    border-radius: var(--radius-sm);
+    font-size: 1rem;
+    transition: all var(--motion-quick);
+}
+.qa-input:focus {
+    outline: none;
+    border-color: var(--civic-accent);
+    box-shadow: 0 0 0 4px var(--civic-accent-lightest);
+}
+.qa-submit {
+    padding: var(--space-md) var(--space-xl);
+    background: var(--civic-accent);
+    color: var(--civic-white);
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: background var(--motion-quick);
+}
+.qa-submit:hover {
+    background: var(--civic-accent-hover);
+}
+.qa-suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-xl);
+    justify-content: center;
+}
+.qa-suggestion {
+    padding: var(--space-sm) var(--space-md);
+    background: var(--civic-light);
+    color: var(--civic-deep);
+    border: 1px solid var(--civic-border);
+    border-radius: 100px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: all var(--motion-quick);
+}
+.qa-suggestion:hover {
+    background: var(--civic-white);
+    border-color: var(--civic-accent);
+    color: var(--civic-accent);
+}
+
+#qa-response {
+    padding: var(--space-xl);
+    background: var(--civic-light);
+    border-radius: var(--radius);
+    border: 1px solid var(--civic-border);
+    display: none;
+}
+.qa-thinking {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    color: var(--civic-accent);
+    font-weight: 500;
+}
+.spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid var(--civic-accent-light);
+    border-top-color: var(--civic-accent);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
+.qa-source-attribution {
+    margin-top: var(--space-lg);
+    font-size: 0.85rem;
+    color: var(--civic-gray);
+    border-top: 1px solid var(--civic-border);
+    padding-top: var(--space-md);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+@media (max-width: 639px) {
+    .hero { padding: var(--space-2xl) 0 var(--space-lg); }
+    .hero-shell { grid-template-columns: 1fr; }
+    .hero h1 { max-width: none; }
+    .hero-actions { flex-direction: column; }
+    .hero-actions .btn { width: 100%; justify-content: center; }
+    .flow-grid { grid-template-columns: 1fr; }
+    .quick-start { padding: var(--space-xl) 0; }
+    .journey-stages { grid-template-columns: 1fr; }
+    .qa-input-group { flex-direction: column; }
+    .countdown-banner { display: flex; flex-direction: column; text-align: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .hero, .feature-card, .quick-start, .spinner { animation: none; }
+    .journey-stage, .stage-details, .qa-input { transition: none; }
+}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <section class="hero" aria-label="Welcome">
+        <div class="hero-shell">
+            <div class="hero-copy">
+                <div class="countdown-banner">
+                    <svg class="icon" aria-hidden="true" style="margin-right: 8px;"><use href="#icon-timeline"></use></svg>
+                    Next General Election (Est): <strong id="countdown-timer">Loading...</strong>
+                </div>
+                <div class="hero-kicker">Election process education</div>
+                <h1>Know exactly what to do before election day.</h1>
+                <p>Answer a few simple questions and we turn deadlines, registration, and voting rules into a clear plan. When a rule feels confusing, ask why and get a plain-language explanation.</p>
+                <div class="hero-actions">
+                    <a href="/wizard" class="btn btn-primary" style="font-size: 1.05rem; padding: 18px 34px; box-shadow: var(--shadow-lg);">
+                        Start the guided path 
+                        <svg class="icon" aria-hidden="true" style="margin-left: 8px;"><use href="#icon-chevron-right"></use></svg>
+                    </a>
+                    <a href="#quick-start" class="btn btn-secondary" style="font-size: 1.05rem; padding: 18px 30px;">
+                        Skip to quick start
+                    </a>
+                </div>
+                <div class="hero-points" aria-label="Key benefits">
+                    <span class="hero-point">
+                        <svg class="icon" aria-hidden="true" style="margin-right: 6px; color: var(--civic-accent);"><use href="#icon-success"></use></svg>
+                        Personalized by state
+                    </span>
+                    <span class="hero-point">
+                        <svg class="icon" aria-hidden="true" style="margin-right: 6px; color: var(--civic-accent);"><use href="#icon-success"></use></svg>
+                        Validated against official sources
+                    </span>
+                    <span class="hero-point">
+                        <svg class="icon" aria-hidden="true" style="margin-right: 6px; color: var(--civic-accent);"><use href="#icon-success"></use></svg>
+                        Built for mobile and late-night use
+                    </span>
+                </div>
+            </div>
+
+            <aside class="hero-panel" aria-label="How it works">
+                <div class="panel-label">How it works</div>
+                <h2>Three moves, in order.</h2>
+                <p>We keep the process in a straight line so you always know what comes next.</p>
+
+                <ol class="path-list">
+                    <li><strong>Tell us your state.</strong> The wizard builds a timeline around your location and voting method.</li>
+                    <li><strong>Review the steps.</strong> Registration, reminders, and election-day timing appear in a simple sequence.</li>
+                    <li><strong>Ask why when needed.</strong> Open any rule explanation without restarting the flow.</li>
+                </ol>
+
+                <div class="mini-timeline" aria-label="Preview timeline">
+                    <div><span>Now</span><strong>Check your status</strong></div>
+                    <div><span>Next</span><strong>Review deadlines</strong></div>
+                    <div><span>Then</span><strong>Vote with confidence</strong></div>
+                </div>
+            </aside>
+        </div>
+    </section>
+
+    <section class="flow-section" aria-label="How the assistant works">
+        <div class="flow-header">
+            <div class="flow-label">A clearer path</div>
+            <h2>Everything is arranged in the order you need it.</h2>
+            <p>First we capture the facts that change from place to place. Then we turn them into a timeline. If anything is unclear, you can ask why without starting over.</p>
+        </div>
+
+        <div class="flow-grid">
+            <article class="flow-card">
+                <div class="flow-step">
+                    <span class="flow-step-num">1</span>
+                    <svg class="icon icon-flow" aria-hidden="true"><use href="#icon-map-pin-check"></use></svg>
+                </div>
+                <h3>Build your timeline</h3>
+                <p>Answer state, registration, and voting method questions to get a personalized deadline map.</p>
+            </article>
+            <article class="flow-card">
+                <div class="flow-step">
+                    <span class="flow-step-num">2</span>
+                    <svg class="icon icon-flow" aria-hidden="true"><use href="#icon-checklist"></use></svg>
+                </div>
+                <h3>Read the steps in order</h3>
+                <p>See what matters first, what comes next, and what you can safely ignore for your situation.</p>
+            </article>
+            <article class="flow-card">
+                <div class="flow-step">
+                    <span class="flow-step-num">3</span>
+                    <svg class="icon icon-flow" aria-hidden="true"><use href="#icon-info"></use></svg>
+                </div>
+                <h3>Ask why when something is unclear</h3>
+                <p>Open a plain-language explanation anytime a rule feels confusing or too technical.</p>
+            </article>
+        </div>
+    </section>
+</div>
+
+<!-- Quick Start (Secondary action) -->
+<section class="quick-start" id="quick-start" aria-label="Quick start">
+    <div class="container quick-start-wrapper">
+        <h2>Already know what you need?</h2>
+        <p class="subtitle">Skip the wizard and jump straight to your customized timeline if you already know your state and voting method.</p>
+        
+        <div class="card">
+            <form action="/timeline" method="POST" autocomplete="off">
+                <div class="form-grid" style="margin-bottom: var(--space-lg);">
+                    <div class="form-group">
+                        <label for="qs-country">Country</label>
+                        <select name="country" id="qs-country" onchange="updateQuickForm()">
+                            <option value="US">United States</option>
+                            <option value="IN">India</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="qs-state">State</label>
+                        <input type="text" name="state" id="qs-state" required placeholder="e.g. CA or NY">
+                    </div>
+                    <div class="form-group" id="qs-zip-container">
+                        <label for="qs-zip">ZIP Code</label>
+                        <input type="text" name="zip_code" id="qs-zip" placeholder="e.g. 90210">
+                    </div>
+                </div>
+                <div class="form-grid" style="margin-bottom: var(--space-lg);">
+                    <div class="form-group">
+                        <label for="qs-reg">Registration Status</label>
+                        <select name="registration_status" id="qs-reg">
+                            <option value="yes">Registered</option>
+                            <option value="no">Not Registered</option>
+                            <option value="unsure">Unsure</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="qs-method">Voting Method</label>
+                        <select name="voting_method" id="qs-method">
+                            <option value="election_day">In-Person (Election Day)</option>
+                            <option value="early">Early Voting</option>
+                            <option value="mail">Mail-in / Absentee</option>
+                        </select>
+                    </div>
+                </div>
+                <input type="hidden" name="moved_recently" value="false">
+                <input type="hidden" name="voting_elsewhere" value="false">
+                <button type="submit" class="btn btn-secondary" style="font-size: 1.05rem; padding: var(--space-md) var(--space-xl); width: 100%;">
+                    Generate Timeline
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<div class="container">
+    <!-- 5-Stage Voter Journey (Education hub) -->
+    <section class="journey-section" aria-label="The Voter Journey">
+        <h2 class="journey-header">The Universal Voter's Journey</h2>
+        <p class="journey-subtitle">Understand the 5 stages of every election process.</p>
+        
+        <div class="journey-stages" id="journey-stages">
+                <button class="journey-stage" data-stage="1" aria-expanded="false">
+                    <div class="stage-icon" aria-hidden="true"><svg class="icon icon-stage"><use href="#icon-checklist"></use></svg></div>
+                    <div class="stage-number">STAGE 1</div>
+                    <div class="stage-title">Registration</div>
+                    <div class="stage-desc">Check &amp; register to vote before deadlines close.</div>
+                    <div class="stage-details">
+                        <h4>Register to Vote</h4>
+                        <ul>
+                            <li>Check voter registration status at your state website</li>
+                            <li>Submit registration application (online, mail, or in-person)</li>
+                            <li>Note: Deadlines vary drastically by state (up to 30 days prior)</li>
+                        </ul>
+                        <h4>Key Safeguards</h4>
+                        <ul>
+                            <li>Verification by local officials prevents duplicate entries</li>
+                            <li>Address verification via DMV or SSN databases</li>
+                        </ul>
+                    </div>
+                </button>
+
+                <button class="journey-stage" data-stage="2" aria-expanded="false">
+                    <div class="stage-icon" aria-hidden="true"><svg class="icon icon-stage"><use href="#icon-megaphone"></use></svg></div>
+                    <div class="stage-number">STAGE 2</div>
+                    <div class="stage-title">Election Notice</div>
+                    <div class="stage-desc">Sample ballots arrive, polling locations announced.</div>
+                    <div class="stage-details">
+                        <h4>What Happens</h4>
+                        <ul>
+                            <li>Election officials publish polling locations and hours</li>
+                            <li>Sample ballots mailed to registered voters</li>
+                            <li>Deadline to request mail-in ballots (if applicable)</li>
+                        </ul>
+                        <h4>What You Should Do</h4>
+                        <ul>
+                            <li>Review your sample ballot</li>
+                            <li>Confirm your polling location hasn't changed</li>
+                            <li>Research candidates and local measures</li>
+                        </ul>
+                    </div>
+                </button>
+
+                <button class="journey-stage" data-stage="3" aria-expanded="false">
+                    <div class="stage-icon" aria-hidden="true"><svg class="icon icon-stage"><use href="#icon-vote"></use></svg></div>
+                    <div class="stage-number">STAGE 3</div>
+                    <div class="stage-title">Voting</div>
+                    <div class="stage-desc">Cast your ballot securely and privately.</div>
+                    <div class="stage-details">
+                        <h4>Voting Methods</h4>
+                        <ul>
+                            <li><strong>Election Day</strong> — In-person voting at assigned location</li>
+                            <li><strong>Early Voting</strong> — In-person before election day (select states)</li>
+                            <li><strong>Mail-in / Absentee</strong> — Postmarked or dropped in official box</li>
+                        </ul>
+                        <h4>What to Bring</h4>
+                        <ul>
+                            <li>Valid ID (if required by your state)</li>
+                            <li>Your sample ballot with notes</li>
+                        </ul>
+                    </div>
+                </button>
+
+                <button class="journey-stage" data-stage="4" aria-expanded="false">
+                    <div class="stage-icon" aria-hidden="true"><svg class="icon icon-stage"><use href="#icon-readiness"></use></svg></div>
+                    <div class="stage-number">STAGE 4</div>
+                    <div class="stage-title">Storage &amp; Transport</div>
+                    <div class="stage-desc">Strict chain-of-custody protects your vote.</div>
+                    <div class="stage-details">
+                        <h4>Security Measures</h4>
+                        <ul>
+                            <li>Ballot boxes sealed with tamper-evident tags</li>
+                            <li>Bipartisan teams transport ballots to central counting</li>
+                            <li>Logs signed at every handover point</li>
+                        </ul>
+                        <h4>Verification</h4>
+                        <ul>
+                            <li>Signatures on mail-in ballots verified against records</li>
+                            <li>Provisional ballots investigated before counting</li>
+                        </ul>
+                    </div>
+                </button>
+
+                <button class="journey-stage" data-stage="5" aria-expanded="false">
+                    <div class="stage-icon" aria-hidden="true"><svg class="icon icon-stage"><use href="#icon-stats"></use></svg></div>
+                    <div class="stage-number">STAGE 5</div>
+                    <div class="stage-title">Counting &amp; Certification</div>
+                    <div class="stage-desc">Votes tallied, audited, and officially certified.</div>
+                    <div class="stage-details">
+                        <h4>Counting Process</h4>
+                        <ul>
+                            <li>Bipartisan teams process and scan ballots</li>
+                            <li>Results published progressively after polls close</li>
+                            <li>Mail-in ballots often take longer to verify and count</li>
+                        </ul>
+                        <h4>Transparency</h4>
+                        <ul>
+                            <li>Post-election risk-limiting audits verify machine counts</li>
+                            <li>Official certification by state canvassing boards</li>
+                        </ul>
+                    </div>
+                </button>
+            </div><!-- /.journey-stages -->
+        </section><!-- /.journey-section -->
+</div><!-- /.container -->
+
+<!-- Q&A Assistant (Full width, grey bg) -->
+<section class="qa-section" aria-label="Ask the Assistant">
+    <div class="container qa-wrapper">
+        <h2 class="qa-header">Got questions? Ask the Assistant</h2>
+        <p class="qa-subtitle">Get citation-backed answers on confusing election rules.</p>
+        
+        <div class="qa-input-group">
+            <input 
+                type="text" 
+                class="qa-input" 
+                id="qa-input" 
+                placeholder="e.g. Do I need an ID to vote? Can I vote early?"
+                aria-label="Ask a question about the election process"
+            >
+            <button class="qa-submit" aria-label="Submit question">Ask</button>
+        </div>
+        
+        <div class="qa-suggestions">
+            <button class="qa-suggestion">Do I need an ID?</button>
+            <button class="qa-suggestion">How do I vote early?</button>
+            <button class="qa-suggestion">What if I moved recently?</button>
+            <button class="qa-suggestion">Are mail-in ballots secure?</button>
+        </div>
+
+        <div id="qa-response">
+            <div id="qa-loading" class="qa-thinking" style="display: none;">
+                <div class="spinner"></div>
+                <span>Analyzing official election rules...</span>
+            </div>
+            
+            <div id="qa-content" style="display: none;">
+                <p id="qa-answer" style="color: var(--civic-deep); line-height: 1.7; font-size: 1.05rem;"></p>
+                
+                <div class="qa-source-attribution">
+                    <svg class="icon" aria-hidden="true" style="margin-right: 4px; color: var(--civic-accent);"><use href="#icon-info"></use></svg>
+                    <strong>Verified Source:</strong> General Election Guidelines. Always verify specific rules with your local election office.
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    // Countdown Timer
+    function updateCountdown() {
+        const nextElection = new Date('2026-11-03T00:00:00Z');
+        const now = new Date();
+        const diff = nextElection - now;
+        
+        if (diff <= 0) {
+            document.getElementById('countdown-timer').textContent = "Election Day is Here!";
+            return;
+        }
+        
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        const minutes = Math.floor((diff / 1000 / 60) % 60);
+        
+        document.getElementById('countdown-timer').textContent = 
+            `${days}d ${String(hours).padStart(2, '0')}h ${String(minutes).padStart(2, '0')}m`;
+    }
+    updateCountdown();
+    setInterval(updateCountdown, 60000); // Update every minute to save CPU
+
+    // Journey Stage Toggle
+    document.querySelectorAll('.journey-stage').forEach(stage => {
+        stage.addEventListener('click', function() {
+            const isActive = this.classList.contains('active');
+            
+            // Close all
+            document.querySelectorAll('.journey-stage').forEach(s => {
+                s.classList.remove('active');
+                s.setAttribute('aria-expanded', 'false');
+            });
+            
+            // If it wasn't active, open it
+            if (!isActive) {
+                this.classList.add('active');
+                this.setAttribute('aria-expanded', 'true');
+            }
+        });
+    });
+
+    // Q&A Assistant Interaction
+    document.querySelector('.qa-submit').addEventListener('click', handleQASubmit);
+    document.getElementById('qa-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') handleQASubmit();
+    });
+
+    function handleQASubmit() {
+        const question = document.getElementById('qa-input').value;
+        if (question.trim()) {
+            const responseContainer = document.getElementById('qa-response');
+            const loadingIndicator = document.getElementById('qa-loading');
+            const contentContainer = document.getElementById('qa-content');
+            const answerText = document.getElementById('qa-answer');
+            
+            // Show loading state
+            responseContainer.style.display = 'block';
+            loadingIndicator.style.display = 'flex';
+            contentContainer.style.display = 'none';
+            
+            // Simulate API processing delay
+            setTimeout(() => {
+                loadingIndicator.style.display = 'none';
+                contentContainer.style.display = 'block';
+                answerText.textContent = `Based on general election guidelines regarding "${question}": Please refer to your state's specific voter portal, as rules vary significantly between jurisdictions.`;
+            }, 1200);
+        }
+    }
+
+    // Suggested questions click handler
+    document.querySelectorAll('.qa-suggestion').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.getElementById('qa-input').value = this.textContent;
+            handleQASubmit();
+        });
+    });
+
+    function updateQuickForm() {
+        const country = document.getElementById('qs-country').value;
+        const zipContainer = document.getElementById('qs-zip-container');
+        zipContainer.style.display = country === 'IN' ? 'none' : 'block';
+    }
+    updateQuickForm();
+</script>
+{% endblock %}

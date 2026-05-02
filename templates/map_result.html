@@ -1,0 +1,96 @@
+<div class="animate-fade-in-up">
+    {% if error %}
+    <div class="error-message flex-row items-center gap-sm">
+        <svg class="icon" style="color: var(--civic-danger);"><use href="#icon-warning"></use></svg>
+        <p class="body mb-0">{{ error }}</p>
+    </div>
+    {% else %}
+    <h3 class="headline mb-md">Results for: {{ address }}</h3>
+    
+    {% if polling_locations %}
+    <h4 class="label mb-sm" style="color: var(--civic-accent);">Election Day Polling Place</h4>
+    <div class="form-grid mb-xl">
+        {% for loc in polling_locations %}
+        <div class="card" style="border-color: var(--civic-accent);">
+            <p class="headline mb-xs" style="font-size: 1.1rem;">{{ loc.address.locationName }}</p>
+            <p class="body">{{ loc.address.line1 }}<br>
+            {% if loc.address.line2 %}{{ loc.address.line2 }}<br>{% endif %}
+            {{ loc.address.city }}, {{ loc.address.state }} {{ loc.address.zip }}</p>
+            
+            {% if loc.pollingHours %}
+            <div class="stat-item mb-sm" style="text-align: left;">
+                <p class="metadata" style="font-size: 0.9rem;">
+                    <svg class="icon icon-sm"><use href="#icon-clock"></use></svg>
+                    <strong>Hours:</strong> {{ loc.pollingHours }}
+                </p>
+            </div>
+            {% endif %}
+            
+            {% if loc.notes %}
+            <p class="metadata mb-sm">
+                <svg class="icon icon-sm"><use href="#icon-info"></use></svg>
+                <strong>Notes:</strong> {{ loc.notes }}
+            </p>
+            {% endif %}
+            
+            <a href="https://www.google.com/maps/search/?api=1&query={{ loc.address.line1|urlencode }},{{ loc.address.city|urlencode }},{{ loc.address.state|urlencode }}" target="_blank" class="btn btn-secondary" style="width: 100%; justify-content: center;">
+                Directions (Google Maps)
+                <svg class="icon icon-sm" style="margin-left: 6px;"><use href="#icon-external-link"></use></svg>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if early_voting %}
+    <h4 class="label mb-sm" style="color: var(--civic-success);">Early Voting Sites</h4>
+    <div class="form-grid">
+        {% for loc in early_voting %}
+        <div class="card" style="border-color: var(--civic-success);">
+            <p class="headline mb-xs" style="font-size: 1.1rem;">{{ loc.address.locationName }}</p>
+            <p class="body">{{ loc.address.line1 }}<br>
+            {% if loc.address.line2 %}{{ loc.address.line2 }}<br>{% endif %}
+            {{ loc.address.city }}, {{ loc.address.state }} {{ loc.address.zip }}</p>
+            
+            {% if loc.startDate and loc.endDate %}
+            <div class="stat-item mb-sm highlight-success" style="text-align: left; background: var(--civic-accent-lightest);">
+                <p class="metadata" style="font-size: 0.9rem; color: var(--civic-success);">
+                    <svg class="icon icon-sm"><use href="#icon-timeline"></use></svg>
+                    <strong>Dates:</strong> {{ loc.startDate }} to {{ loc.endDate }}
+                </p>
+            </div>
+            {% endif %}
+            
+            {% if loc.pollingHours %}
+            <div class="stat-item" style="text-align: left;">
+                <p class="metadata" style="font-size: 0.9rem;">
+                    <svg class="icon icon-sm"><use href="#icon-clock"></use></svg>
+                    <strong>Hours:</strong> {{ loc.pollingHours }}
+                </p>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if not polling_locations and not early_voting %}
+    <div class="card" style="background: var(--civic-light); border-style: dashed;">
+        <h4 class="headline mb-xs">No Locations Found</h4>
+        <p class="body mb-md">We couldn't find specific polling locations for this address. This could mean it's too early for the data to be published, or your state votes entirely by mail.</p>
+        
+        {% if state_info and state_info[0].electionAdministrationBody %}
+        <div class="mt-md" style="padding-top: var(--space-md); border-top: 1px solid var(--civic-border);">
+            <p class="label mb-sm">Please check your state's official website:</p>
+            {% if state_info[0].electionAdministrationBody.electionInfoUrl %}
+            <a href="{{ state_info[0].electionAdministrationBody.electionInfoUrl }}" target="_blank" class="btn btn-primary">
+                State Election Info
+                <svg class="icon icon-sm" style="margin-left: 6px;"><use href="#icon-external-link"></use></svg>
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+    {% endif %}
+</div>

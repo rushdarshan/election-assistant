@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+{% block title %}Server Analytics — Election Process Guide{% endblock %}
+
+{% block extra_css %}
+.stats-page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: var(--space-2xl) var(--space-lg) var(--space-3xl);
+}
+
+/* ── Metric Cards ── */
+.metric-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: var(--space-lg);
+    margin: var(--space-xl) 0 var(--space-2xl);
+}
+.metric-card {
+    background: var(--civic-white);
+    border: 1px solid var(--civic-border);
+    border-radius: var(--radius);
+    padding: var(--space-xl);
+    box-shadow: var(--shadow);
+}
+.metric-card h3 {
+    font-size: 0.8rem;
+    color: var(--civic-gray);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+    margin-bottom: var(--space-sm);
+}
+.metric-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--civic-accent);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+}
+.metric-detail {
+    margin-top: var(--space-md);
+    font-size: 0.9rem;
+    color: var(--civic-deep);
+    line-height: 1.6;
+}
+.metric-detail strong { font-weight: 600; }
+
+/* ── Section Headers ── */
+.section-header {
+    font-family: 'Literata', serif;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--civic-deep);
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--civic-border);
+}
+
+/* ── Data Table ── */
+.data-table-card {
+    background: var(--civic-white);
+    border: 1px solid var(--civic-border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    margin-bottom: var(--space-2xl);
+}
+.data-table {
+    width: 100%;
+    text-align: left;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    font-variant-numeric: tabular-nums;
+}
+.data-table thead th {
+    background: var(--civic-light);
+    padding: var(--space-md) var(--space-lg);
+    font-weight: 600;
+    color: var(--civic-deep);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 2px solid var(--civic-border);
+}
+.data-table tbody td {
+    padding: var(--space-md) var(--space-lg);
+    border-bottom: 1px solid var(--civic-border);
+    color: var(--civic-deep);
+}
+.data-table tbody tr:last-child td { border-bottom: none; }
+.data-table tbody tr:hover { background: var(--civic-accent-lightest); }
+
+/* ── Topic List ── */
+.topic-card {
+    background: var(--civic-white);
+    border: 1px solid var(--civic-border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+.topic-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-md) var(--space-lg);
+    border-bottom: 1px solid var(--civic-border);
+    font-size: 0.9rem;
+}
+.topic-item:last-child { border-bottom: none; }
+.topic-item strong { font-weight: 600; color: var(--civic-deep); }
+.topic-item span {
+    font-variant-numeric: tabular-nums;
+    color: var(--civic-accent);
+    font-weight: 600;
+}
+
+/* ── Harden: Empty data ── */
+.empty-data {
+    padding: var(--space-xl);
+    text-align: center;
+    color: var(--civic-gray);
+    font-size: 0.9rem;
+}
+
+@media (max-width: 639px) {
+    .metric-row { grid-template-columns: 1fr; }
+    .data-table-card { overflow-x: auto; }
+}
+{% endblock %}
+
+{% block content %}
+<div class="stats-page">
+    <div class="hero-action-card animate-fade-in-up">
+        <div class="flex-row items-center gap-sm mb-sm">
+            <svg class="icon" style="color: var(--civic-accent);"><use href="#icon-stats"></use></svg>
+            <div class="jurisdiction-label mb-0">System Dashboard</div>
+        </div>
+        <h1>Server Analytics</h1>
+        <p class="body" style="color: var(--civic-gray-light); max-width: 50ch; margin-left: auto; margin-right: auto;">Live stats for the current session. Resets on server restart.</p>
+    </div>
+
+    <!-- Metric Cards -->
+    <div class="metric-row animate-fade-in-up" style="animation-delay: 80ms;">
+        <div class="metric-card">
+            <h3 class="label">Total Queries</h3>
+            <div class="metric-value">{{ total_queries }}</div>
+        </div>
+        <div class="metric-card">
+            <h3 class="label">AI Usage</h3>
+            <div class="metric-detail">
+                <p class="body mb-0"><strong>Vertex AI:</strong> {{ ai_provider.vertex_ai }}</p>
+                <p class="body mb-0"><strong>Fallback:</strong> {{ ai_provider.fallback }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Endpoint Performance -->
+    <h3 class="section-header headline">Endpoint Performance</h3>
+    <div class="data-table-card animate-fade-in-up" style="animation-delay: 160ms;">
+        {% if endpoints %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th scope="col">Endpoint</th>
+                    <th scope="col">Hits</th>
+                    <th scope="col">Avg Response (s)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for endpoint, count in endpoints.items() %}
+                <tr>
+                    <td><code class="metadata" style="font-family: monospace;">{{ endpoint }}</code></td>
+                    <td>{{ count }}</td>
+                    <td>{{ "%.3f"|format(avg_times[endpoint]) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-data body">No endpoint data recorded yet.</div>
+        {% endif %}
+    </div>
+
+    <!-- Top Topics -->
+    <h3 class="section-header headline">Top Question Topics</h3>
+    <div class="topic-card animate-fade-in-up" style="animation-delay: 240ms;">
+        {% for topic, count in topics.items() %}
+        <div class="topic-item">
+            <strong class="headline" style="font-size: 0.95rem;">{{ topic }}</strong>
+            <span class="highlight-accent">{{ count }}</span>
+        </div>
+        {% else %}
+        <div class="empty-data body">No topics recorded yet.</div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

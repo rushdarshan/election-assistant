@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %}Step {{ step }} of {{ total_steps }}: Registration — Election Process Guide{% endblock %}
+
+{% block extra_css %}
+.wizard-container {
+    max-width: 600px;
+    margin: 8vh auto;
+    padding: 0 var(--space-lg);
+}
+.wizard-heading {
+    font-size: clamp(2rem, 5vw, 2.4rem);
+    color: var(--civic-deep);
+    margin-bottom: var(--space-xl);
+    line-height: 1.2;
+    text-align: center;
+}
+.radio-group { gap: var(--space-md); }
+.radio-option {
+    border: 2px solid var(--civic-border);
+    padding: var(--space-xl) var(--space-lg);
+    border-radius: var(--radius);
+    font-size: 1.2rem;
+    font-weight: 500;
+    transition: all var(--motion-standard) var(--ease-out-quart);
+    background: var(--civic-white);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+.radio-option:hover, .radio-option:focus-within {
+    border-color: var(--civic-accent);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+.radio-option input[type="radio"] {
+    width: 24px; height: 24px;
+}
+{% endblock %}
+
+{% block content %}
+<div class="container wizard-container animate-fade-in-up">
+    <!-- Progress Indicator -->
+    <div class="mb-2xl" style="text-align: center;">
+        <span class="label">Step {{ step }} of {{ total_steps }}</span>
+        <div class="progress-bar" aria-hidden="true" style="max-width: 160px; margin: var(--space-sm) auto 0;">
+            {% for i in range(1, total_steps + 1) %}
+            <div class="progress-step {{ 'done' if i <= step else '' }}" style="height: 6px; border-radius: 3px;"></div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div>
+        <h1 class="wizard-heading headline">Are you already registered to vote?</h1>
+        <form action="/wizard/step/3" method="POST" id="wizard-form">
+            <input type="hidden" name="country" value="{{ country|default('US') }}">
+            <input type="hidden" name="state" value="{{ state|default('') }}">
+            <input type="hidden" name="zip_code" value="{{ zip_code|default('') }}">
+
+            <fieldset class="wizard-fieldset">
+                <legend class="sr-only">Registration Status</legend>
+                <div class="radio-group">
+                    <label class="radio-option flex-row items-center gap-md">
+                        <input type="radio" name="registration_status" value="yes" required>
+                        <div class="flex-row items-center gap-sm">
+                            <svg class="icon" style="color: var(--civic-success);"><use href="#icon-success"></use></svg>
+                            <span class="body" style="font-size: 1.15rem; font-weight: 600;">Yes, I'm registered</span>
+                        </div>
+                    </label>
+                    <label class="radio-option flex-row items-center gap-md">
+                        <input type="radio" name="registration_status" value="no" required>
+                        <div class="flex-row items-center gap-sm">
+                            <svg class="icon" style="color: var(--civic-danger);"><use href="#icon-warning"></use></svg>
+                            <span class="body" style="font-size: 1.15rem; font-weight: 600;">No, I need to register</span>
+                        </div>
+                    </label>
+                    <label class="radio-option flex-row items-center gap-md">
+                        <input type="radio" name="registration_status" value="unsure" required>
+                        <div class="flex-row items-center gap-sm">
+                            <svg class="icon" style="color: var(--civic-warn);"><use href="#icon-info"></use></svg>
+                            <span class="body" style="font-size: 1.15rem; font-weight: 600;">I'm not sure</span>
+                        </div>
+                    </label>
+                </div>
+            </fieldset>
+
+            <div class="flex-row justify-center mt-xl">
+                <a href="javascript:history.back()" class="metadata" style="text-decoration: none; font-weight: 600;">
+                    <svg class="icon icon-sm" style="margin-right: 4px; transform: scaleX(-1);"><use href="#icon-chevron-right"></use></svg>
+                    Go Back
+                </a>
+            </div>
+
+            <noscript>
+                <div class="mt-lg" style="text-align: center;">
+                    <button type="submit" class="btn btn-primary" style="padding: var(--space-md) var(--space-xl); font-size: 1.1rem;">
+                        Continue
+                        <svg class="icon icon-sm" style="margin-left: 6px;"><use href="#icon-chevron-right"></use></svg>
+                    </button>
+                </div>
+            </noscript>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('input[type="radio"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            const card = e.target.closest('.radio-option');
+            card.classList.add('active-selection');
+            setTimeout(() => {
+                document.getElementById('wizard-form').submit();
+            }, 350);
+        });
+    });
+</script>
+
+<style>
+.active-selection {
+    background: var(--civic-accent-lightest) !important;
+    border-color: var(--civic-accent) !important;
+    box-shadow: var(--shadow-lg) !important;
+}
+</style>
+{% endblock %}

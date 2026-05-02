@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+{% block title %}AI Chat — Election Process Guide{% endblock %}
+
+{% block extra_css %}
+.chat-page {
+    max-width: 840px;
+    margin: 0 auto;
+    padding: var(--space-2xl) var(--space-lg) var(--space-3xl);
+}
+
+/* ── Chat Container ── */
+.chat-container {
+    background: var(--civic-white);
+    border: 1px solid var(--civic-border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    height: min(680px, 70vh);
+    margin-top: var(--space-xl);
+}
+
+.chat-history {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--space-lg);
+    background: var(--civic-light);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    scroll-behavior: smooth;
+}
+
+/* ── Messages ── */
+.chat-msg {
+    max-width: 80%;
+    padding: var(--space-md) var(--space-lg);
+    border-radius: var(--radius);
+    line-height: 1.6;
+    font-size: 0.95rem;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+.chat-user {
+    align-self: flex-end;
+    background: var(--civic-accent);
+    color: #FFFFFF;
+    border-bottom-right-radius: 4px;
+}
+.chat-assistant {
+    align-self: flex-start;
+    background: var(--civic-white);
+    border: 1px solid var(--civic-border);
+    color: var(--civic-deep);
+    border-bottom-left-radius: 4px;
+}
+.chat-assistant p { margin-bottom: var(--space-sm); }
+.chat-assistant p:last-child { margin-bottom: 0; }
+.chat-assistant ul { margin-left: var(--space-lg); margin-bottom: var(--space-sm); }
+
+/* ── Input Bar ── */
+.chat-input-bar {
+    padding: var(--space-md);
+    border-top: 1px solid var(--civic-border);
+    background: var(--civic-white);
+}
+.chat-input-bar form {
+    display: flex;
+    gap: var(--space-sm);
+}
+.chat-input-bar input[type="text"] {
+    flex: 1;
+    padding: var(--space-md);
+    border: 2px solid var(--civic-border);
+    border-radius: var(--radius-sm);
+    font-size: 0.95rem;
+    font-family: inherit;
+    background: var(--civic-light);
+    color: var(--civic-deep);
+    transition: border-color var(--motion-quick);
+    min-height: 44px;
+}
+.chat-input-bar input[type="text"]:focus {
+    outline: none;
+    border-color: var(--civic-accent);
+    background: var(--civic-white);
+}
+.chat-input-bar button {
+    min-height: 44px;
+    min-width: 72px;
+}
+.chat-indicator {
+    font-size: 0.8rem;
+    color: var(--civic-gray);
+    padding: var(--space-xs) var(--space-xs) 0;
+    display: none;
+}
+
+/* ── Harden: Error toast ── */
+.chat-error {
+    padding: var(--space-sm) var(--space-md);
+    background: var(--civic-danger-bg);
+    color: var(--civic-danger);
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    margin-top: var(--space-sm);
+}
+
+@media (max-width: 639px) {
+    .chat-container { height: min(500px, 60vh); }
+    .chat-msg { max-width: 90%; }
+}
+{% endblock %}
+
+{% block content %}
+<div class="chat-page">
+    <div class="hero-action-card animate-fade-in-up">
+        <div class="flex-row items-center gap-sm mb-sm">
+            <svg class="icon" style="color: var(--civic-accent);"><use href="#icon-chat"></use></svg>
+            <div class="jurisdiction-label mb-0">Live Support</div>
+        </div>
+        <h1>AI Assistant</h1>
+        <p class="body" style="color: var(--civic-gray-light); max-width: 50ch; margin-left: auto; margin-right: auto;">Ask any voting or election-related question. Sessions clear after 30 minutes.</p>
+    </div>
+
+    <div class="chat-container animate-fade-in-up" style="animation-delay: 80ms;">
+        <div id="chat-history" class="chat-history" role="log" aria-live="polite" aria-label="Chat messages">
+            {% include "chat_messages.html" %}
+        </div>
+
+        <div class="chat-input-bar">
+            <form hx-post="/chat" hx-target="#chat-history" hx-swap="beforeend"
+                  hx-on::after-request="this.reset(); document.getElementById('chat-history').scrollTop = document.getElementById('chat-history').scrollHeight;"
+                  hx-on::response-error="document.getElementById('chat-error').style.display='block';">
+                <input type="text" name="message" placeholder="Type your question here…" required
+                       autocomplete="off" maxlength="500" aria-label="Your question"
+                       id="chat-input">
+                <button type="submit" class="btn btn-primary" id="chat-submit-btn">
+                    Send
+                    <svg class="icon icon-sm" style="margin-left: 4px;"><use href="#icon-chat"></use></svg>
+                </button>
+            </form>
+            <div id="chat-indicator" class="chat-indicator htmx-indicator">
+                <div class="spinner icon-sm" style="display: inline-block; vertical-align: middle; margin-right: 4px;"></div>
+                Thinking…
+            </div>
+            <div id="chat-error" class="chat-error" style="display: none;">
+                <svg class="icon icon-sm" style="margin-right: 4px;"><use href="#icon-warning"></use></svg>
+                Something went wrong. Please try again.
+                <button type="button" onclick="this.parentElement.style.display='none'" style="background:none;border:none;color:var(--civic-danger);cursor:pointer;font-weight:600;margin-left:var(--space-sm);">✕</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.body.addEventListener('htmx:beforeRequest', function(evt) {
+        if(evt.detail.elt.tagName === 'FORM' && evt.detail.elt.querySelector('input[name="message"]')) {
+            document.getElementById('chat-indicator').style.display = 'block';
+            document.getElementById('chat-submit-btn').disabled = true;
+            document.getElementById('chat-error').style.display = 'none';
+        }
+    });
+    document.body.addEventListener('htmx:afterRequest', function(evt) {
+        if(evt.detail.elt.tagName === 'FORM' && evt.detail.elt.querySelector('input[name="message"]')) {
+            document.getElementById('chat-indicator').style.display = 'none';
+            document.getElementById('chat-submit-btn').disabled = false;
+        }
+    });
+    // Harden: Handle network errors
+    document.body.addEventListener('htmx:responseError', function(evt) {
+        document.getElementById('chat-indicator').style.display = 'none';
+        document.getElementById('chat-submit-btn').disabled = false;
+        document.getElementById('chat-error').style.display = 'block';
+    });
+    window.onload = function() {
+        var objDiv = document.getElementById("chat-history");
+        if (objDiv) objDiv.scrollTop = objDiv.scrollHeight;
+    }
+</script>
+{% endblock %}

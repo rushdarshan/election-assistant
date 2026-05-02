@@ -1,0 +1,335 @@
+{% extends "base.html" %}
+
+{% block title %}Scenario Simulator — Election Process Guide{% endblock %}
+
+{% block extra_css %}
+/* ── Layout: Generous section spacing, clear hierarchy ── */
+.scenarios-page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: var(--space-2xl) var(--space-lg) var(--space-3xl);
+}
+
+/* ── Typeset: Proper heading scale, readable body ── */
+.scenarios-page h2 {
+    font-family: 'Literata', serif;
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: var(--civic-deep);
+    margin-bottom: var(--space-md);
+    letter-spacing: -0.01em;
+}
+
+.scenarios-page .hint {
+    color: var(--civic-gray);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    font-style: normal;
+    margin-bottom: var(--space-lg);
+}
+
+/* ── Grid: Responsive scenario cards with rhythm ── */
+.scenario-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-lg);
+    margin-top: var(--space-xl);
+    margin-bottom: var(--space-3xl);
+}
+
+.scenario-card {
+    border: 1px solid var(--civic-border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: box-shadow var(--motion-standard) var(--ease-out), transform var(--motion-standard) var(--ease-out);
+}
+.scenario-card:hover,
+.scenario-card:focus-within {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+}
+
+.scenario-btn {
+    width: 100%;
+    padding: var(--space-xl) var(--space-lg);
+    background: var(--civic-white);
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    min-height: 120px;
+}
+.scenario-btn:focus-visible {
+    outline: 3px solid var(--civic-accent);
+    outline-offset: -3px;
+}
+
+.scenario-icon {
+    font-size: 1.8rem;
+    line-height: 1;
+    margin-bottom: var(--space-xs);
+}
+
+/* Typeset: Card headings — semibold, tight leading */
+.scenario-btn h3 {
+    margin: 0;
+    font-family: 'Work Sans', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--civic-deep);
+    line-height: 1.25;
+}
+
+/* Typeset: Card body — smaller, looser for readability */
+.scenario-btn p {
+    margin: 0;
+    font-size: 0.88rem;
+    color: var(--civic-gray);
+    line-height: 1.55;
+}
+
+/* ── Result area ── */
+.scenario-result-area {
+    margin-top: var(--space-xl);
+}
+
+/* ── Solution card (rendered via HTMX) ── */
+.solution-card {
+    background: var(--civic-white);
+    border: 1px solid var(--civic-border);
+    border-radius: var(--radius);
+    padding: var(--space-xl);
+    margin-top: var(--space-md);
+    box-shadow: var(--shadow);
+}
+
+.solution-steps {
+    list-style: none;
+    padding: 0;
+    margin: var(--space-lg) 0;
+    counter-reset: step-counter;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.solution-steps li {
+    counter-increment: step-counter;
+    padding: var(--space-md) var(--space-lg) var(--space-md) calc(var(--space-2xl) + var(--space-sm));
+    background: var(--civic-light);
+    border: 1px solid var(--civic-border);
+    border-radius: var(--radius-sm);
+    position: relative;
+}
+.solution-steps li::before {
+    content: counter(step-counter);
+    position: absolute;
+    left: var(--space-lg);
+    top: var(--space-md);
+    width: 24px;
+    height: 24px;
+    background: var(--civic-accent);
+    color: #fff;
+    border-radius: 50%;
+    font-weight: 700;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.solution-steps .step-action {
+    font-weight: 600;
+    display: block;
+    color: var(--civic-deep);
+    line-height: 1.4;
+}
+.solution-steps .step-details {
+    color: var(--civic-gray);
+    font-size: 0.88rem;
+    line-height: 1.55;
+    margin-top: var(--space-xs);
+}
+.solution-steps .step-link {
+    display: inline-block;
+    margin-top: var(--space-xs);
+    font-size: 0.85rem;
+    color: var(--civic-accent);
+    font-weight: 500;
+}
+.solution-steps .step-link:hover { text-decoration: underline; }
+
+.documents-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+    list-style: none;
+    padding: 0;
+    margin-top: var(--space-sm);
+}
+.documents-list li {
+    background: var(--civic-warn-bg);
+    color: var(--civic-warn);
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.official-links-list {
+    list-style: none;
+    padding: 0;
+    margin-top: var(--space-sm);
+}
+.official-links-list li { margin-bottom: var(--space-xs); }
+.official-links-list a {
+    color: var(--civic-accent);
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+.official-links-list a:hover { text-decoration: underline; }
+
+.next-action-box {
+    background: var(--civic-success-bg);
+    color: var(--civic-success);
+    padding: var(--space-md) var(--space-lg);
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    margin-top: var(--space-lg);
+    line-height: 1.5;
+}
+
+.estimated-time {
+    color: var(--civic-gray);
+    font-size: 0.85rem;
+    margin-top: var(--space-sm);
+}
+
+/* ── Harden: Error state ── */
+.error-message {
+    color: var(--civic-danger);
+    padding: var(--space-md) var(--space-lg);
+    background: var(--civic-danger-bg);
+    border-radius: var(--radius-sm);
+    margin-top: var(--space-md);
+    line-height: 1.5;
+}
+.error-message button {
+    margin-top: var(--space-sm);
+    background: transparent;
+    border: 1px solid var(--civic-danger);
+    color: var(--civic-danger);
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.85rem;
+}
+
+/* ── Harden: Empty state ── */
+.empty-state {
+    text-align: center;
+    padding: var(--space-3xl) var(--space-lg);
+    color: var(--civic-gray);
+}
+.empty-state .empty-icon { font-size: 2.5rem; margin-bottom: var(--space-md); }
+.empty-state p { font-size: 0.95rem; line-height: 1.6; }
+
+/* ── HTMX loading indicator ── */
+.htmx-indicator {
+    display: none;
+}
+.htmx-request .htmx-indicator,
+.htmx-request.htmx-indicator {
+    display: block;
+}
+.loading-pulse {
+    padding: var(--space-lg);
+    text-align: center;
+    color: var(--civic-gray);
+    font-size: 0.9rem;
+    animation: pulse-opacity 1.5s ease-in-out infinite;
+}
+@keyframes pulse-opacity {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+}
+
+@media (max-width: 639px) {
+    .scenario-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-md);
+    }
+    .solution-card { padding: var(--space-lg); }
+}
+{% endblock %}
+
+{% block content %}
+<main id="main-content" class="scenarios-page">
+    <div class="hero-action-card animate-fade-in-up">
+        <div class="flex-row items-center gap-sm mb-sm">
+            <svg class="icon" style="color: var(--civic-accent);"><use href="#icon-scenarios"></use></svg>
+            <div class="jurisdiction-label mb-0">Simulation Hub</div>
+        </div>
+        <h1 id="scenarios-heading">Scenario Simulator</h1>
+        <p class="body" style="color: var(--civic-gray-light); max-width: 55ch;">Explore "what-if" voting situations and get step-by-step guidance for each one.</p>
+    </div>
+
+    <section aria-labelledby="scenarios-heading">
+        {% if scenarios %}
+        <div class="scenario-grid" role="list" aria-label="Available scenarios">
+            {% for sid, scenario in scenarios.items() %}
+            <div class="scenario-card" role="listitem">
+                <button
+                    type="button"
+                    class="scenario-btn"
+                    hx-post="/scenarios/partial"
+                    hx-target="#scenario-result"
+                    hx-swap="innerHTML"
+                    hx-vals='{"scenario_id": "{{ sid }}"}'
+                    hx-indicator="#scenario-loading"
+                    aria-label="Explore: {{ scenario.title }}"
+                >
+                    <span class="scenario-icon" aria-hidden="true">
+                        {% if sid == 'lost_voter_id' %}<svg class="icon"><use href="#icon-id-card"></use></svg>
+                        {% elif sid == 'moved_wrong_precinct' %}<svg class="icon"><use href="#icon-home"></use></svg>
+                        {% elif sid == 'name_mismatch' %}<svg class="icon"><use href="#icon-user-x"></use></svg>
+                        {% elif sid == 'missed_deadline' %}<svg class="icon"><use href="#icon-clock"></use></svg>
+                        {% elif sid == 'no_id_at_polling' %}<svg class="icon"><use href="#icon-warning"></use></svg>
+                        {% elif sid == 'lost_mail_ballot' %}<svg class="icon"><use href="#icon-mailbox"></use></svg>
+                        {% elif sid == 'provisional_ballot' %}<svg class="icon"><use href="#icon-vote"></use></svg>
+                        {% elif sid == 'accessibility_accommodations' %}<svg class="icon"><use href="#icon-accessibility"></use></svg>
+                        {% else %}<svg class="icon"><use href="#icon-info"></use></svg>
+                        {% endif %}
+                    </span>
+                    <h3>{{ scenario.title }}</h3>
+                    <p>{{ scenario.description }}</p>
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon" aria-hidden="true"><svg class="icon" style="width: 3rem; height: 3rem; color: var(--civic-border);"><use href="#icon-mailbox"></use></svg></div>
+            <p class="body">No scenarios available yet. Check back soon.</p>
+        </div>
+        {% endif %}
+    </section>
+
+    <section aria-labelledby="result-heading" class="scenario-result-area">
+        <h2 id="result-heading" class="headline">Scenario Solution</h2>
+        <p class="hint">Select a scenario above to see the step-by-step solution.</p>
+
+        <div id="scenario-loading" class="htmx-indicator loading-pulse" aria-live="polite">
+            <div class="spinner icon-sm" style="display: inline-block; vertical-align: middle; margin-right: 8px;"></div>
+            Generating your personalized solution…
+        </div>
+        <div id="scenario-result" aria-live="polite"></div>
+    </section>
+</main>
+{% endblock %}

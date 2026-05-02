@@ -1,0 +1,11 @@
+<div class="card animate-fade-in-up" style="border-color: var(--civic-accent);">
+    <h2 style="color: var(--civic-accent); border-bottom: 1px solid var(--civic-border); padding-bottom: var(--space-sm); margin-bottom: var(--space-md);">{{ title }}</h2>
+    <div class="scenario-content" style="line-height: 1.6;">
+        {{ content|safe }}
+    </div>
+</div>
+<style>
+.scenario-content ul { margin-left: 20px; margin-bottom: 16px; }
+.scenario-content li { margin-bottom: 8px; }
+.scenario-content p { margin-bottom: 16px; }
+</style>

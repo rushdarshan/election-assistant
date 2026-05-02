@@ -1,0 +1,59 @@
+<div id="ask-result" class="animate-fade-in-up">
+    <h3 class="headline" style="font-size: 1.15rem; margin-bottom: var(--space-md);">{{ result.summary }}</h3>
+
+    <ul class="body" style="font-size: 0.95rem; margin-bottom: var(--space-lg);">
+    {% for item in result.explanation %}
+        <li style="margin-bottom: var(--space-xs);">{{ item }}</li>
+    {% endfor %}
+    </ul>
+
+    {% if result.what_varies %}
+    <h4 class="label mb-sm">What Varies</h4>
+    <ul class="body" style="font-size: 0.9rem; margin-bottom: var(--space-lg);">
+    {% for item in result.what_varies %}
+        <li style="margin-bottom: var(--space-xs);">{{ item }}</li>
+    {% endfor %}
+    </ul>
+    {% endif %}
+
+    {% if result.next_steps %}
+    <h4 class="label mb-sm">Next Steps</h4>
+    <ul class="body" style="font-size: 0.9rem; margin-bottom: var(--space-lg);">
+    {% for step in result.next_steps %}
+        <li style="margin-bottom: var(--space-xs);">
+            <a href="{{ step.url }}" target="_blank" rel="noopener" style="color: var(--civic-accent); font-weight: 600;">{{ step.label }} <svg class="icon icon-sm"><use href="#icon-external-link"></use></svg></a>
+        </li>
+    {% endfor %}
+    </ul>
+    {% endif %}
+
+    {% if result.if_something_goes_wrong %}
+    <h4 class="label mb-sm" style="color: var(--civic-danger);">If Something Goes Wrong</h4>
+    <ul class="body" style="font-size: 0.9rem; margin-bottom: var(--space-lg);">
+    {% for item in result.if_something_goes_wrong %}
+        <li style="margin-bottom: var(--space-xs);">{{ item }}</li>
+    {% endfor %}
+    </ul>
+    {% endif %}
+
+    {% if result.citations %}
+    <div class="citations mt-xl" style="padding-top: var(--space-md); border-top: 1px solid var(--civic-border);">
+        <h4 class="label mb-sm">Sources</h4>
+        <ul class="metadata" style="display: block;">
+        {% for cite in result.citations %}
+            <li style="margin-bottom: var(--space-sm);">
+                <em class="body" style="font-size: 0.85rem; display: block;">"{{ cite.quote }}"</em>
+                <span style="font-size: 0.75rem; color: var(--civic-gray);">ID: {{ cite.kb_id }}</span>
+            </li>
+        {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <p class="metadata mt-xl" style="font-style: italic;">{{ result.disclaimer }}</p>
+</div>
+
+<script>
+    const followup = document.getElementById('followup-section');
+    if (followup) followup.style.display = 'block';
+</script>

@@ -1,0 +1,14 @@
+pytest
+pytest-asyncio
+fastapi
+uvicorn
+jinja2
+pydantic
+pydantic-settings
+httpx
+google-cloud-aiplatform
+PyYAML
+python-multipart
+itsdangerous
+google-generativeai
+python-dotenv

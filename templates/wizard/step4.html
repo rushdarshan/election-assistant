@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}Step {{ step }} of {{ total_steps }}: Voting Method — Election Process Guide{% endblock %}
+
+{% block extra_css %}
+.wizard-container {
+    max-width: 600px;
+    margin: 8vh auto;
+    padding: 0 var(--space-lg);
+}
+.wizard-heading {
+    font-size: clamp(2rem, 5vw, 2.4rem);
+    color: var(--civic-deep);
+    margin-bottom: var(--space-xl);
+    line-height: 1.2;
+    text-align: center;
+}
+.radio-group { gap: var(--space-md); display: flex; flex-direction: column; }
+.radio-option {
+    border: 2px solid var(--civic-border);
+    padding: var(--space-xl) var(--space-lg);
+    border-radius: var(--radius);
+    font-size: 1.2rem;
+    font-weight: 600;
+    transition: all var(--motion-standard) var(--ease-out-quart);
+    background: var(--civic-white);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    cursor: pointer;
+    color: var(--civic-deep);
+}
+.radio-option:hover, .radio-option:focus-within {
+    border-color: var(--civic-accent);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+.radio-option input[type="radio"] {
+    width: 24px; height: 24px;
+    accent-color: var(--civic-accent);
+    margin: 0;
+}
+.secondary-checkbox {
+    padding: var(--space-md) var(--space-lg);
+    border-radius: var(--radius-sm);
+    background: var(--civic-light);
+    border: 2px solid transparent;
+    transition: border-color var(--motion-quick);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: 0.95rem;
+    color: var(--civic-deep);
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: var(--space-md);
+}
+.secondary-checkbox:hover, .secondary-checkbox:focus-within { 
+    border-color: var(--civic-border); 
+}
+.secondary-checkbox input[type="checkbox"] {
+    width: 18px; height: 18px;
+    accent-color: var(--civic-accent);
+    margin: 0;
+}
+{% endblock %}
+
+{% block content %}
+<div class="container wizard-container animate-fade-in-up">
+    <!-- Progress Indicator -->
+    <div class="mb-2xl" style="text-align: center;">
+        <span class="label">Step {{ step }} of {{ total_steps }}</span>
+        <div class="progress-bar" aria-hidden="true" style="max-width: 160px; margin: var(--space-sm) auto 0;">
+            {% for i in range(1, total_steps + 1) %}
+            <div class="progress-step {{ 'done' if i <= step else '' }}" style="height: 6px; border-radius: 3px;"></div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div>
+        <h1 class="wizard-heading headline">How do you plan to vote?</h1>
+        <form action="/wizard/step/4" method="POST" autocomplete="off">
+            <input type="hidden" name="country" value="{{ country|default('US') }}">
+            <input type="hidden" name="state" value="{{ state|default('') }}">
+            <input type="hidden" name="zip_code" value="{{ zip_code|default('') }}">
+            <input type="hidden" name="registration_status" value="{{ registration_status|default('yes') }}">
+
+            <fieldset class="wizard-fieldset">
+                <legend class="sr-only">Voting Method</legend>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="voting_method" value="election_day" required>
+                        <svg class="icon" style="color: var(--civic-accent);"><use href="#icon-vote"></use></svg>
+                        <span class="body" style="font-size: 1.15rem; font-weight: 600;">In-Person (Election Day)</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="voting_method" value="early" required>
+                        <svg class="icon" style="color: var(--civic-accent);"><use href="#icon-timeline"></use></svg>
+                        <span class="body" style="font-size: 1.15rem; font-weight: 600;">Early Voting (In-Person)</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="voting_method" value="mail" required>
+                        <svg class="icon" style="color: var(--civic-accent);"><use href="#icon-mailbox"></use></svg>
+                        <span class="body" style="font-size: 1.15rem; font-weight: 600;">Mail-in / Absentee Ballot</span>
+                    </label>
+                </div>
+            </fieldset>
+
+            <div class="mt-xl">
+                {% if show_moved_question %}
+                <label class="secondary-checkbox">
+                    <input type="checkbox" name="moved_recently" value="true">
+                    <span class="body" style="font-size: 0.95rem;">I moved recently to a new address</span>
+                </label>
+                {% endif %}
+                <label class="secondary-checkbox">
+                    <input type="checkbox" name="voting_elsewhere" value="true">
+                    <span class="body" style="font-size: 0.95rem;">I'm voting from elsewhere (student / military)</span>
+                </label>
+            </div>
+
+            <div class="flex-row items-center gap-md" style="justify-content: center; margin-top: var(--space-2xl);">
+                <a href="javascript:history.back()" class="btn btn-secondary" style="font-size: 1.1rem; padding: var(--space-md) var(--space-xl);">
+                    <svg class="icon icon-sm" style="margin-right: 6px; transform: scaleX(-1);"><use href="#icon-chevron-right"></use></svg>
+                    Back
+                </a>
+                <button type="submit" class="btn btn-primary" style="font-size: 1.1rem; padding: var(--space-md) var(--space-2xl);">
+                    See my plan
+                    <svg class="icon icon-sm" style="margin-left: 6px;"><use href="#icon-success"></use></svg>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

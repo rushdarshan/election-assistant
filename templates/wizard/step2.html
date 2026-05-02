@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block title %}Step {{ step }} of {{ total_steps }}: Which state? — Election Process Guide{% endblock %}
+
+{% block extra_css %}
+.wizard-container {
+    max-width: 600px;
+    margin: 8vh auto;
+    padding: 0 var(--space-lg);
+}
+.wizard-heading {
+    font-size: clamp(2rem, 5vw, 2.4rem);
+    color: var(--civic-deep);
+    margin-bottom: var(--space-xl);
+    line-height: 1.1;
+    text-align: center;
+}
+.form-group label {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+select, input[type="text"] {
+    font-size: 1.1rem;
+    padding: var(--space-lg);
+    border: 2px solid var(--civic-border);
+    border-radius: var(--radius);
+    width: 100%;
+}
+select:focus, input[type="text"]:focus {
+    border-color: var(--civic-accent);
+    box-shadow: 0 0 0 4px var(--civic-accent-lightest);
+}
+{% endblock %}
+
+{% block content %}
+<div class="container wizard-container animate-fade-in-up">
+    <!-- Progress Indicator -->
+    <div class="mb-2xl" style="text-align: center;">
+        <span class="label">Step {{ step }} of {{ total_steps }}</span>
+        <div class="progress-bar" aria-hidden="true" style="max-width: 160px; margin: var(--space-sm) auto 0;">
+            {% for i in range(1, total_steps + 1) %}
+            <div class="progress-step {{ 'done' if i <= step else '' }}" style="height: 6px; border-radius: 3px;"></div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div>
+        <h1 class="wizard-heading headline">Which state are you in?</h1>
+
+        <form action="/wizard/step/2" method="POST" autocomplete="off">
+            <input type="hidden" name="country" value="{{ country|default('US') }}">
+
+            {% if country == 'IN' %}
+            <div class="form-group mb-xl">
+                <label for="state" class="sr-only">State or Union Territory</label>
+                <select name="state" id="state" required autofocus>
+                    <option value="">Select your state...</option>
+                    <option value="AP">Andhra Pradesh</option>
+                    <option value="AR">Arunachal Pradesh</option>
+                    <option value="AS">Assam</option>
+                    <option value="BR">Bihar</option>
+                    <option value="CG">Chhattisgarh</option>
+                    <option value="DL">Delhi</option>
+                    <option value="GA">Goa</option>
+                    <option value="GJ">Gujarat</option>
+                    <option value="HR">Haryana</option>
+                    <option value="HP">Himachal Pradesh</option>
+                    <option value="JH">Jharkhand</option>
+                    <option value="KA">Karnataka</option>
+                    <option value="KL">Kerala</option>
+                    <option value="MH">Maharashtra</option>
+                    <option value="MP">Madhya Pradesh</option>
+                    <option value="MN">Manipur</option>
+                    <option value="ML">Meghalaya</option>
+                    <option value="MZ">Mizoram</option>
+                    <option value="NL">Nagaland</option>
+                    <option value="OR">Odisha</option>
+                    <option value="PB">Punjab</option>
+                    <option value="RJ">Rajasthan</option>
+                    <option value="SK">Sikkim</option>
+                    <option value="TN">Tamil Nadu</option>
+                    <option value="TR">Tripura</option>
+                    <option value="TG">Telangana</option>
+                    <option value="UP">Uttar Pradesh</option>
+                    <option value="UK">Uttarakhand</option>
+                    <option value="WB">West Bengal</option>
+                    <option value="AN">Andaman & Nicobar (UT)</option>
+                    <option value="CH">Chandigarh (UT)</option>
+                    <option value="DN">Dadra & Nagar Haveli (UT)</option>
+                    <option value="DD">Daman & Diu (UT)</option>
+                    <option value="JK">Jammu & Kashmir (UT)</option>
+                    <option value="LD">Lakshadweep (UT)</option>
+                    <option value="LA">Ladakh (UT)</option>
+                    <option value="PY">Puducherry (UT)</option>
+                </select>
+            </div>
+            {% else %}
+            <div class="form-group mb-lg">
+                <label for="state" class="sr-only">State (USPS Code)</label>
+                <input type="text" name="state" id="state" required placeholder="e.g. CA or NY" autofocus>
+            </div>
+
+            <div class="form-group mb-xl">
+                <label for="zip_code" class="metadata" style="font-weight: 500; font-size: 0.95rem;">
+                    ZIP Code <span style="font-weight: normal;">(optional, for precinct details)</span>
+                </label>
+                <input type="text" name="zip_code" id="zip_code" placeholder="e.g. 90210" style="font-size: 1rem; padding: var(--space-md);">
+            </div>
+            {% endif %}
+
+            <div class="flex-row items-center gap-md" style="justify-content: center; margin-top: var(--space-2xl);">
+                <a href="/wizard/step/1" class="btn btn-secondary" style="font-size: 1.1rem; padding: var(--space-md) var(--space-xl);">
+                    <svg class="icon icon-sm" style="margin-right: 6px; transform: scaleX(-1);"><use href="#icon-chevron-right"></use></svg>
+                    Back
+                </a>
+                <button type="submit" class="btn btn-primary" style="font-size: 1.1rem; padding: var(--space-md) var(--space-2xl);">
+                    Continue
+                    <svg class="icon icon-sm" style="margin-left: 6px;"><use href="#icon-chevron-right"></use></svg>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

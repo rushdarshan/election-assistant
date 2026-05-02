@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Step {{ step }} of {{ total_steps }}: Where are you voting? — Election Process Guide{% endblock %}
+
+{% block extra_css %}
+.wizard-container {
+    max-width: 600px;
+    margin: 8vh auto;
+    padding: 0 var(--space-lg);
+}
+.wizard-heading {
+    font-size: clamp(2rem, 5vw, 2.4rem);
+    color: var(--civic-deep);
+    margin-bottom: var(--space-xl);
+    line-height: 1.2;
+    text-align: center;
+}
+.radio-group { gap: var(--space-md); }
+.radio-option {
+    border: 2px solid var(--civic-border);
+    padding: var(--space-xl) var(--space-lg);
+    border-radius: var(--radius);
+    font-size: 1.2rem;
+    font-weight: 500;
+    transition: all var(--motion-standard) var(--ease-out-quart);
+    background: var(--civic-white);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+.radio-option:hover, .radio-option:focus-within {
+    border-color: var(--civic-accent);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+.radio-option input[type="radio"] {
+    width: 24px; height: 24px;
+}
+{% endblock %}
+
+{% block content %}
+<div class="container wizard-container animate-fade-in-up">
+    <!-- Progress Indicator -->
+    <div class="mb-2xl" style="text-align: center;">
+        <span class="label">Step {{ step }} of {{ total_steps }}</span>
+        <div class="progress-bar" aria-hidden="true" style="max-width: 160px; margin: var(--space-sm) auto 0;">
+            {% for i in range(1, total_steps + 1) %}
+            <div class="progress-step {{ 'done' if i <= step else '' }}" style="height: 6px; border-radius: 3px;"></div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div>
+        <h1 class="wizard-heading headline">Where are you voting?</h1>
+        <form action="/wizard/step/1" method="POST" id="wizard-form">
+            <fieldset class="wizard-fieldset">
+                <legend class="sr-only">Country</legend>
+                <div class="radio-group">
+                    <label class="radio-option flex-row items-center gap-md">
+                        <input type="radio" name="country" value="US" required>
+                        <span class="body" style="font-size: 1.25rem; font-weight: 600;">United States</span>
+                    </label>
+                    <label class="radio-option flex-row items-center gap-md">
+                        <input type="radio" name="country" value="IN" required>
+                        <span class="body" style="font-size: 1.25rem; font-weight: 600;">India</span>
+                    </label>
+                </div>
+            </fieldset>
+
+            <noscript>
+                <div class="mt-2xl" style="text-align: center;">
+                    <button type="submit" class="btn btn-primary" style="padding: var(--space-md) var(--space-xl); font-size: 1.1rem;">
+                        Continue
+                        <svg class="icon icon-sm" style="margin-left: 6px;"><use href="#icon-chevron-right"></use></svg>
+                    </button>
+                </div>
+            </noscript>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Auto-advance
+    document.querySelectorAll('input[type="radio"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            const card = e.target.closest('.radio-option');
+            card.classList.add('active-selection');
+            setTimeout(() => {
+                document.getElementById('wizard-form').submit();
+            }, 350);
+        });
+    });
+</script>
+
+<style>
+.active-selection {
+    background: var(--civic-accent-lightest) !important;
+    border-color: var(--civic-accent) !important;
+    box-shadow: var(--shadow-lg) !important;
+}
+</style>
+{% endblock %}

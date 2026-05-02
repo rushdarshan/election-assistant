@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}Polling Place Finder — Election Process Guide{% endblock %}
+
+{% block extra_css %}
+.map-page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: var(--space-2xl) var(--space-lg) var(--space-3xl);
+}
+
+.address-form {
+    background: var(--civic-white);
+    border: 1px solid var(--civic-border);
+    border-radius: var(--radius);
+    padding: var(--space-xl);
+    box-shadow: var(--shadow);
+    margin-top: var(--space-xl);
+}
+
+.address-form .form-group {
+    margin-bottom: var(--space-lg);
+}
+.address-form label {
+    display: block;
+    font-weight: 600;
+    color: var(--civic-deep);
+    margin-bottom: var(--space-sm);
+    font-size: 0.95rem;
+}
+.address-form input[type="text"] {
+    width: 100%;
+    padding: var(--space-md);
+    border: 2px solid var(--civic-border);
+    border-radius: var(--radius-sm);
+    font-size: 1rem;
+    font-family: inherit;
+    background: var(--civic-light);
+    color: var(--civic-deep);
+    transition: border-color var(--motion-quick);
+    min-height: 48px;
+}
+.address-form input[type="text"]:focus {
+    outline: none;
+    border-color: var(--civic-accent);
+    background: var(--civic-white);
+    box-shadow: 0 0 0 3px var(--civic-accent-focus);
+}
+
+.find-btn {
+    width: 100%;
+    min-height: 48px;
+    font-size: 1rem;
+}
+
+/* ── Loading indicator ── */
+.map-loading {
+    padding: var(--space-lg);
+    text-align: center;
+    color: var(--civic-gray);
+    font-size: 0.9rem;
+    animation: pulse-opacity 1.5s ease-in-out infinite;
+}
+@keyframes pulse-opacity {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+}
+
+/* ── Results area ── */
+.map-result-area {
+    margin-top: var(--space-xl);
+}
+
+@media (max-width: 639px) {
+    .address-form { padding: var(--space-lg); }
+}
+{% endblock %}
+
+{% block content %}
+<div class="map-page">
+    <div class="hero-action-card animate-fade-in-up">
+        <div class="flex-row items-center gap-sm mb-sm">
+            <svg class="icon" style="color: var(--civic-accent);"><use href="#icon-map"></use></svg>
+            <div class="jurisdiction-label mb-0">Location Services</div>
+        </div>
+        <h1>Polling Place Finder</h1>
+        <p class="body" style="color: var(--civic-gray-light); max-width: 50ch; margin-left: auto; margin-right: auto;">Enter your registered address to find your polling location and voting hours.</p>
+    </div>
+
+    <div class="address-form animate-fade-in-up" style="animation-delay: 80ms;">
+        <form hx-post="/map" hx-target="#map-result" hx-indicator="#map-loading"
+              hx-on::response-error="document.getElementById('map-result').innerHTML='<div class=\'error-message flex-row items-center gap-sm\'><svg class=\'icon\' style=\'color:var(--civic-danger);\'><use href=\'#icon-warning\'></use></svg><span>Could not find your polling place. Please check your address and try again.</span></div>';">
+            <div class="form-group">
+                <label for="address">Full Registered Address</label>
+                <input type="text" id="address" name="address"
+                       placeholder="123 Main St, City, State ZIP"
+                       required autocomplete="street-address"
+                       maxlength="200"
+                       aria-describedby="address-hint">
+                <p id="address-hint" class="metadata mt-md" style="font-size: 0.8rem;">
+                    <svg class="icon icon-sm"><use href="#icon-info"></use></svg>
+                    Enter the address where you're registered to vote.
+                </p>
+            </div>
+            <button type="submit" class="btn btn-primary find-btn">
+                Find Polling Place
+                <svg class="icon icon-sm" style="margin-left: 6px;"><use href="#icon-chevron-right"></use></svg>
+            </button>
+        </form>
+    </div>
+
+    <div id="map-loading" class="htmx-indicator map-loading" aria-live="polite">
+        <div class="spinner icon-sm" style="display: inline-block; vertical-align: middle; margin-right: 4px;"></div>
+        Searching official databases…
+    </div>
+
+    <div id="map-result" class="map-result-area" aria-live="polite"></div>
+</div>
+{% endblock %}
