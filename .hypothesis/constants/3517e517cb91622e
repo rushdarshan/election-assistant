@@ -1,0 +1,4 @@
+# file: C:\Users\rushd\AppData\Roaming\Python\Python313\site-packages\google\ai\generativelanguage_v1beta\services\model_service\client.py
+# hypothesis_version: 6.151.9
+
+['.googleapis.com', '.mtls.googleapis.com', 'ModelServiceClient', 'always', 'api_key', 'auto', 'credentials', 'false', 'folders/{folder}', 'googleapis.com', 'grpc', 'grpc_asyncio', 'models/{model}', 'name', 'never', 'projects/{project}', 'rest', 'true', 'tuned_model.name', 'universe_domain']

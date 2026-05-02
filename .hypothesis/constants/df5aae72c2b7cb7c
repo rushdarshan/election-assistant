@@ -1,0 +1,4 @@
+# file: C:\Users\rushd\AppData\Roaming\Python\Python313\site-packages\pexpect\expect.py
+# hypothesis_version: 6.151.9
+
+['\nsearcher: %s', '    %d: %r', '    %d: EOF', '    %d: TIMEOUT', 'longest_string', 'searcher_re:', 'searcher_string:']

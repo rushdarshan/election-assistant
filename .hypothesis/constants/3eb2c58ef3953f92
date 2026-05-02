@@ -1,0 +1,4 @@
+# file: C:\Users\rushd\AppData\Roaming\Python\Python313\site-packages\google\generativeai\files.py
+# hypothesis_version: 6.151.9
+
+[100, '.webp', '/', 'delete_file', 'get_file', 'image/webp', 'list_files', 'upload_file']

@@ -1,0 +1,4 @@
+# file: C:\Users\rushd\AppData\Roaming\Python\Python313\site-packages\oauth2client\crypt.py
+# hypothesis_version: 6.151.9
+
+[b'.', 300, 86400, 'JWT', 'RS256', 'alg', 'aud', 'exp', 'iat', 'kid', 'typ']

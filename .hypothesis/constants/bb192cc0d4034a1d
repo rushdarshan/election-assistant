@@ -1,0 +1,4 @@
+# file: C:\Users\rushd\AppData\Roaming\Python\Python313\site-packages\google\ai\generativelanguage_v1beta\types\safety.py
+# hypothesis_version: 6.151.9
+
+['ContentFilter', 'HarmCategory', 'SafetyFeedback', 'SafetyRating', 'SafetySetting']

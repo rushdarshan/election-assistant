@@ -1,0 +1,4 @@
+# file: C:\Users\rushd\AppData\Roaming\Python\Python313\site-packages\pytest_pyodide\fixture.py
+# hypothesis_version: 6.151.9
+
+['--dist-dir', 'chrome', 'chromium', 'firefox', 'function', 'module', 'no support in node', 'node', 'playwright', 'safari', 'selenium', 'selenium_standalone', 'session']

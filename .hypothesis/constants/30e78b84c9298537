@@ -1,0 +1,4 @@
+# file: C:\Users\rushd\Downloads\ele\election-assistant\app\map.py
+# hypothesis_version: 6.151.9
+
+[200, 2000, '/map', 'GOOGLE_CIVIC_API_KEY', 'Polling Location', 'active_nav', 'address', 'earlyVoteSites', 'early_voting', 'electionId', 'error', 'key', 'map', 'map.html', 'map_result.html', 'pollingLocations', 'polling_locations', 'request', 'state', 'state_info', 'templates']

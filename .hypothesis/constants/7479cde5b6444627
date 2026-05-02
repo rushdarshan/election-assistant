@@ -1,0 +1,4 @@
+# file: C:\Users\rushd\AppData\Roaming\Python\Python313\site-packages\googleapiclient\errors.py
+# hypothesis_version: 6.151.9
+
+['<BatchError "%s">', '<BatchError %s "%s">', '<HttpError %s "%s">', 'detail', 'details', 'error', 'errors', 'message', 'status', 'utf-8']

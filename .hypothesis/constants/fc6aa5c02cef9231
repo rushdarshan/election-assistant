@@ -1,0 +1,4 @@
+# file: C:\Users\rushd\AppData\Roaming\Python\Python313\site-packages\starlette\middleware\sessions.py
+# hypothesis_version: 6.151.9
+
+['/', '; secure', 'Set-Cookie', 'http', 'http.response.start', 'httponly; samesite=', 'lax', 'none', 'null', 'session', 'strict', 'type', 'utf-8', 'websocket']

@@ -1,0 +1,4 @@
+# file: C:\Users\rushd\Downloads\ele\election-assistant\app\stats.py
+# hypothesis_version: 6.151.9
+
+[0.0, '/stats', 'Early Voting', 'General', 'ID Requirements', 'Mail Voting', 'Polling Location', 'Registration', 'absentee', 'active_nav', 'advance', 'ai_provider', 'avg_times', 'ballot', 'deadline', 'early', 'endpoints', 'fallback', 'id', 'identification', 'license', 'location', 'mail', 'passport', 'place', 'polling', 'post', 'register', 'registration', 'request', 'response_times', 'stats', 'stats.html', 'templates', 'topics', 'total_queries', 'vertex_ai', 'where']

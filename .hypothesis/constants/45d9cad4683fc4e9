@@ -1,0 +1,4 @@
+# file: C:\Users\rushd\AppData\Roaming\Python\Python313\site-packages\google\ai\generativelanguage_v1beta\services\cache_service\client.py
+# hypothesis_version: 6.151.9
+
+['.googleapis.com', '.mtls.googleapis.com', 'CacheServiceClient', 'always', 'api_key', 'auto', 'cachedContents/{id}', 'cached_content.name', 'credentials', 'false', 'folders/{folder}', 'googleapis.com', 'grpc', 'grpc_asyncio', 'models/{model}', 'name', 'never', 'projects/{project}', 'rest', 'true', 'universe_domain']

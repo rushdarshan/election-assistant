@@ -1,0 +1,4 @@
+# file: C:\Users\rushd\AppData\Roaming\Python\Python313\site-packages\pytest_pyodide\runner.py
+# hypothesis_version: 6.151.9
+
+[128, 1000, '$', '--headless', '--no-sandbox', '.', '/bin/bash', '127.0.0.1', 'READY!!', '[01]\r\n', 'chrome', 'firefox', 'gc()', 'node', 'node --version', 'null', 'return self.logs;', 'safari', 'self.logs = []', 'session', 'undefined', 'utf-8', '{LINE_OK}\r\n']

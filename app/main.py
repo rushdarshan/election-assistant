@@ -535,6 +535,8 @@ async def readiness_update(req: Request):
         
         progress = ReadinessProgress(
             country=data["country"],
+            model = genai.GenerativeModel('gemini-pro',
+            system_instruction="You are a non-partisan election assistant..."),
             state=data.get("state", ""),
             registration_status=data.get("registration_status"),
             voting_method=data.get("voting_method"),

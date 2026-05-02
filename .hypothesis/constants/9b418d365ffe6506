@@ -1,0 +1,4 @@
+# file: C:\Users\rushd\AppData\Roaming\Python\Python313\site-packages\pytest_pyodide\server.py
+# hypothesis_version: 6.151.9
+
+[200, '*', '*.html', '*.js', ',', '.js', '127.0.0.1', 'Content-Length', 'Content-type', 'Stopping server...', 'TERMINATE', '_templates', 'extra_headers', 'http-server.log', 'test-server', 'text/html', 'w']

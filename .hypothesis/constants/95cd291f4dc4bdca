@@ -1,0 +1,4 @@
+# file: C:\Users\rushd\AppData\Roaming\Python\Python313\site-packages\pytest_pyodide\run_tests_inside_pyodide.py
+# hypothesis_version: 6.151.9
+
+['*/testcase[failure]', '--color=no', '--junitxml', '-o', './system-err', './system-out', 'Captured Err', 'Captured Out', 'T', '\\S', 'failure', 'playwright', 'test_output.xml']

@@ -1,0 +1,4 @@
+# file: C:\Users\rushd\AppData\Roaming\Python\Python313\site-packages\pytest_pyodide\hook.py
+# hypothesis_version: 6.151.9
+
+[b'run_in_pyodide', 10000, '*', '*.whl', ',', '--dist-dir', '--rt', '--run-in-pyodide', '--runner', '--runtime', '-no-host', 'Host test', 'Non-host test', '^safari[\\-$]?', 'chrome', 'cls', 'dist', 'dist_dir', 'doctestmodules_', 'firefox', 'fixturenames', 'general', 'host', 'markers', 'module', 'node', 'playwright', 'pyodide', 'runtime', 'safari', 'selenium', 'selenium_standalone', 'store', 'test_files']

@@ -1,0 +1,4 @@
+# file: C:\Users\rushd\AppData\Roaming\Python\Python313\site-packages\google\ai\generativelanguage_v1beta\services\file_service\transports\grpc.py
+# hypothesis_version: 6.151.9
+
+['create_file', 'delete_file', 'get_file', 'grpc', 'list_files']

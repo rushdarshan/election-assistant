@@ -1,0 +1,4 @@
+# file: C:\Users\rushd\Downloads\ele\election-assistant\app\analytics.py
+# hypothesis_version: 6.151.9
+
+[-100, 100, 'avg_ms', 'chat_messages_sent', 'checklist_toggles', 'count', 'endpoint_stats', 'last_reset', 'map_lookups', 'max_ms', 'min_ms', 'scenarios_viewed', 'total_page_views']

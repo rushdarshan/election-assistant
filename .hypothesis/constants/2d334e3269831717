@@ -1,0 +1,4 @@
+# file: C:\Users\rushd\AppData\Roaming\Python\Python313\site-packages\pytest_pyodide\doctest.py
+# hypothesis_version: 6.151.9
+
+['.py', 'RUN_IN_PYODIDE', '__name__', 'collect_doctests', 'fixturenames', 'getfixture', 'module', 'patch_doctest_runner', 'pyodide_test', 'pytest', 'runtime', 'selenium']

@@ -1,0 +1,4 @@
+# file: C:\Users\rushd\AppData\Roaming\Python\Python313\site-packages\google\generativeai\responder.py
+# hypothesis_version: 6.151.9
+
+['ValueType', 'any', 'array', 'auto', 'boolean', 'format', 'format_', 'function', 'integer', 'items', 'mode', 'mode_any', 'mode_auto', 'mode_none', 'none', 'nullable', 'number', 'object', 'properties', 'required', 'result', 'string', 'title', 'type', 'type_', 'type_array', 'type_boolean', 'type_integer', 'type_number', 'type_object', 'type_string', 'type_unspecified', 'unspecified']

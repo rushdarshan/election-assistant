@@ -42,7 +42,7 @@ async def chat_post(request: Request, message: str = Form(...)):
             ai_msg = {"role": "assistant", "content": response.text}
         except Exception as e:
             print(f"Chat API Error: {e}")
-            ai_msg = {"role": "assistant", "content": f"<p>I'm having trouble connecting right now. Error: {e}</p>"}
+            ai_msg = {"role": "assistant", "content": f"<p>I'm having trouble connecting right now. Error details: {e}</p>"}
     else:
         record_ai_usage("fallback")
         ai_msg = {"role": "assistant", "content": "<p>AI is not configured. This is a fallback response.</p>"}

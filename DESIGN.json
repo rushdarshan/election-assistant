@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-05-02T13:46:00Z",
+  "title": "Design System: Election Process Guide",
+  "extensions": {
+    "colorMeta": {
+      "primary": { "role": "primary", "displayName": "Civic Accent Blue", "canonical": "#2563EB", "tonalRamp": ["#EFF6FF", "#DBEAFE", "#BFDBFE", "#93C5FD", "#60A5FA", "#3B82F6", "#2563EB", "#1D4ED8", "#1E40AF", "#1E3A8A"] },
+      "civic-deep": { "role": "neutral", "displayName": "Civic Deep Slate", "canonical": "#0F172A", "tonalRamp": ["#F8FAFC", "#F1F5F9", "#E2E8F0", "#CBD5E1", "#94A3B8", "#64748B", "#475569", "#334155", "#1E293B", "#0F172A"] },
+      "civic-gray": { "role": "neutral", "displayName": "Civic Gray", "canonical": "#64748B", "tonalRamp": ["#F8FAFC", "#F1F5F9", "#E2E8F0", "#CBD5E1", "#94A3B8", "#64748B", "#475569", "#334155", "#1E293B", "#0F172A"] },
+      "civic-success": { "role": "secondary", "displayName": "Civic Success", "canonical": "#059669", "tonalRamp": ["#ECFDF5", "#D1FAE5", "#A7F3D0", "#6EE7B7", "#34D399", "#10B981", "#059669", "#047857", "#065F46", "#064E3B"] },
+      "civic-warn": { "role": "secondary", "displayName": "Civic Warn", "canonical": "#D97706", "tonalRamp": ["#FFFBEB", "#FEF3C7", "#FDE68A", "#FCD34D", "#FBBF24", "#F59E0B", "#D97706", "#B45309", "#92400E", "#78350F"] },
+      "civic-danger": { "role": "secondary", "displayName": "Civic Danger", "canonical": "#DC2626", "tonalRamp": ["#FEF2F2", "#FEE2E2", "#FECACA", "#FCA5A5", "#F87171", "#EF4444", "#DC2626", "#B91C1C", "#991B1B", "#7F1D1D"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Hero headers and page titles. Institutional authority." },
+      "body": { "displayName": "Body", "purpose": "Standard paragraph text. Accessible legibility." }
+    },
+    "shadows": [
+      { "name": "shadow", "value": "0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07)", "purpose": "Ambient shadow for standard cards." },
+      { "name": "shadow-lg", "value": "0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.08)", "purpose": "Hover/focus lift." }
+    ],
+    "motion": [
+      { "name": "motion-quick", "value": "150ms", "purpose": "Hover transitions on buttons and inputs." },
+      { "name": "ease-out-quart", "value": "cubic-bezier(0.165, 0.84, 0.44, 1)", "purpose": "Smooth expansive movements." }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "btn-primary",
+      "description": "The primary call to action.",
+      "html": "<button class=\"ds-btn-primary\">Submit Details</button>",
+      "css": ".ds-btn-primary { background-color: #2563EB; color: #FFFFFF; font-family: 'Work Sans', sans-serif; font-weight: 600; font-size: 1.1rem; padding: 16px 32px; border: none; border-radius: 8px; cursor: pointer; transition: all 150ms ease; } .ds-btn-primary:hover { background-color: #1D4ED8; transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07); }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "btn-secondary",
+      "description": "Alternative actions or back navigation.",
+      "html": "<button class=\"ds-btn-secondary\">Cancel</button>",
+      "css": ".ds-btn-secondary { background-color: transparent; color: #64748B; font-family: 'Work Sans', sans-serif; font-weight: 600; font-size: 1.1rem; padding: 16px 32px; border: 2px solid #E2E8F0; border-radius: 8px; cursor: pointer; transition: all 150ms ease; } .ds-btn-secondary:hover { border-color: #94A3B8; color: #0F172A; transform: translateY(-2px); }"
+    },
+    {
+      "name": "Hero Action Card",
+      "kind": "card",
+      "refersTo": "hero-action-card",
+      "description": "Wrapper for the primary task on the page.",
+      "html": "<div class=\"ds-hero-card\"><div class=\"ds-label\">Jurisdiction</div><h2>Find Your Polling Place</h2><p>Check the latest election updates in your area.</p></div>",
+      "css": ".ds-hero-card { background: #FFFFFF; border-radius: 12px; padding: 48px; border: 1px solid #E2E8F0; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.08); text-align: left; font-family: 'Work Sans', sans-serif; } .ds-label { display: inline-flex; text-transform: uppercase; letter-spacing: 0.12em; font-size: 0.75rem; font-weight: 700; color: #2563EB; margin-bottom: 8px; } .ds-hero-card h2 { font-family: 'Literata', serif; font-size: 2rem; color: #0F172A; margin: 0 0 8px 0; } .ds-hero-card p { color: #64748B; line-height: 1.6; margin: 0; }"
+    },
+    {
+      "name": "Input Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Standard form text input.",
+      "html": "<input type=\"text\" class=\"ds-input\" placeholder=\"Enter ZIP code\">",
+      "css": ".ds-input { width: 100%; padding: 16px; border: 2px solid #E2E8F0; border-radius: 8px; font-family: 'Work Sans', sans-serif; font-size: 1.05rem; background: #F8FAFC; color: #0F172A; transition: all 150ms ease; box-sizing: border-box; } .ds-input:focus { outline: none; border-color: #2563EB; background: #FFFFFF; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Civic Authority",
+    "overview": "The Election Process Guide is built to instill trust, clarity, and competence. Voting can be an overwhelming, deadline-driven process. The aesthetic philosophy here relies on structured typography, high-contrast readability, and generous whitespace. We explicitly reject bureaucratic clutter, confusing walls of text, and overly colorful decorative noise.",
+    "keyCharacteristics": [
+      "Clarity over cleverness: Information is progressively disclosed.",
+      "Hierarchical precision: Size and weight contrast immediately draw the eye to actions and deadlines.",
+      "Sturdy and trustworthy: Serif display headings ground the system in institutional authority, while sans-serif body copy ensures high legibility."
+    ],
+    "rules": [
+      {
+        "name": "The One Action Rule",
+        "body": "The Civic Accent Blue (#2563EB) is reserved strictly for interactive elements (links, buttons, active focus states). Do not use it for passive text or decorative background fills.",
+        "section": "colors"
+      },
+      {
+        "name": "The Strict Serif Rule",
+        "body": "Literata is reserved exclusively for major headings (h1, h2) and prominent numbers (like stage counters). It is never used for body paragraphs or UI controls.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Background Rule",
+        "body": "The app background is always flat. Shadows are only applied to white surfaces (cards, buttons, modals) to denote interactivity and hierarchy.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do use the 4pt spacing scale (var(--space-md), var(--space-xl)) consistently to maintain rhythm.",
+      "Do wrap primary tasks in the Hero Action Card pattern to command focus.",
+      "Do use progressive disclosure (like accordions or step-by-step wizards) for complex legal requirements."
+    ],
+    "donts": [
+      "Don't use border-left or border-right greater than 1px as a colored stripe on cards. Use full borders or background tints.",
+      "Don't use gradient text anywhere in the interface.",
+      "Don't use generic shadow values. Stick to the predefined --shadow and --shadow-lg tokens."
+    ]
+  }
+}

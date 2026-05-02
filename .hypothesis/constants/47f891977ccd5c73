@@ -1,0 +1,4 @@
+# file: C:\Users\rushd\AppData\Roaming\Python\Python313\site-packages\google\ai\generativelanguage_v1beta\types\generative_service.py
+# hypothesis_version: 6.151.9
+
+['AttributionSourceId', 'Candidate', 'ContentEmbedding', 'CountTokensRequest', 'CountTokensResponse', 'EmbedContentRequest', 'EmbedContentResponse', 'GenerationConfig', 'GroundingAttribution', 'GroundingChunk', 'GroundingMetadata', 'GroundingSupport', 'LogprobsResult', 'RetrievalMetadata', 'SearchEntryPoint', 'Segment', 'TaskType', 'chunk_type', 'grounding_source', 'source']

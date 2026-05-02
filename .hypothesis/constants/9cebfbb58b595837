@@ -1,0 +1,4 @@
+# file: C:\Users\rushd\Downloads\ele\election-assistant\app\readiness.py
+# hypothesis_version: 6.151.9
+
+[0.0, 0.1, 0.2, 0.35, 0.7, 1.0, 25.0, 50.0, 75.0, 100.0, 100, 'Getting Ready', 'Start Here', 'Voting-Ready', 'checklist_completion', 'knowledge_ready', 'no', 'readiness-excellent', 'readiness-fair', 'readiness-good', 'readiness-needs-work', 'registration_ready', 'unsure', 'voting_ready', 'yes', '🔴', '🟠', '🟡', '🟢']
