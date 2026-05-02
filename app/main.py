@@ -86,28 +86,28 @@ def sanitize(value: str, max_len: int = _MAX_INPUT_LEN) -> str:
 # ── Custom Error Handlers (Bug #19, #26) ──
 @app.exception_handler(404)
 async def not_found_handler(request: Request, exc: HTTPException):
-    return templates.TemplateResponse("errors/404.html", {
+    return templates.TemplateResponse(request=request, name="errors/404.html", context= {
         "request": request, "active_nav": ""
     }, status_code=404)
 
 @app.exception_handler(405)
 async def method_not_allowed_handler(request: Request, exc: HTTPException):
-    return templates.TemplateResponse("errors/405.html", {
+    return templates.TemplateResponse(request=request, name="errors/405.html", context= {
         "request": request, "active_nav": ""
     }, status_code=405)
 
 @app.exception_handler(StarletteHTTPException)
 async def generic_http_handler(request: Request, exc: StarletteHTTPException):
     if exc.status_code == 404:
-        return templates.TemplateResponse("errors/404.html", {
+        return templates.TemplateResponse(request=request, name="errors/404.html", context= {
             "request": request, "active_nav": ""
         }, status_code=404)
     if exc.status_code == 405:
-        return templates.TemplateResponse("errors/405.html", {
+        return templates.TemplateResponse(request=request, name="errors/405.html", context= {
             "request": request, "active_nav": ""
         }, status_code=405)
     # Fallback for other HTTP errors
-    return templates.TemplateResponse("errors/404.html", {
+    return templates.TemplateResponse(request=request, name="errors/404.html", context= {
         "request": request, "active_nav": ""
     }, status_code=exc.status_code)
 
@@ -121,7 +121,7 @@ async def healthz():
 # ── Landing ──
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request, "active_nav": "home"})
+    return templates.TemplateResponse(request=request, name="index.html", context= {"request": request, "active_nav": "home"})
 
 
 # ── Quick-Start Timeline (POST from homepage form) ──
@@ -152,7 +152,7 @@ async def get_timeline(
         voting_elsewhere=voting_elsewhere,
         zip_code=safe_zip or None
     )
-    return templates.TemplateResponse("timeline.html", {
+    return templates.TemplateResponse(request=request, name="timeline.html", context= {
         "request": request,
         "timeline": timeline.model_dump(),
         "active_nav": "wizard"
@@ -193,7 +193,7 @@ async def ask_why_partial(
             topic_id=topic_id,
             timeline_context=timeline_data
         )
-        return templates.TemplateResponse("ask_why_partial.html", {
+        return templates.TemplateResponse(request=request, name="ask_why_partial.html", context= {
             "request": request,
             "result": result,
             "topic_id": topic_id
@@ -208,14 +208,14 @@ async def ask_why_partial(
 
 @app.get("/wizard", response_class=HTMLResponse)
 async def wizard_landing(request: Request):
-    return templates.TemplateResponse("wizard/step1.html", {
+    return templates.TemplateResponse(request=request, name="wizard/step1.html", context= {
         "request": request, "step": 1, "total_steps": 4, "active_nav": "wizard"
     })
 
 
 @app.get("/wizard/step/1", response_class=HTMLResponse)
 async def wizard_step1(request: Request):
-    return templates.TemplateResponse("wizard/step1.html", {
+    return templates.TemplateResponse(request=request, name="wizard/step1.html", context= {
         "request": request, "step": 1, "total_steps": 4, "active_nav": "wizard"
     })
 
@@ -223,7 +223,7 @@ async def wizard_step1(request: Request):
 @app.post("/wizard/step/1", response_class=HTMLResponse)
 async def wizard_step1_post(request: Request, country: str = Form(...)):
     safe_country = sanitize(country, 5)
-    return templates.TemplateResponse("wizard/step2.html", {
+    return templates.TemplateResponse(request=request, name="wizard/step2.html", context= {
         "request": request, "step": 2, "total_steps": 4,
         "country": safe_country, "active_nav": "wizard"
     })
@@ -239,7 +239,7 @@ async def wizard_step2_post(
     safe_state = sanitize(state, 30)
     safe_country = sanitize(country, 5)
     safe_zip = sanitize(zip_code or "", 10)
-    return templates.TemplateResponse("wizard/step3.html", {
+    return templates.TemplateResponse(request=request, name="wizard/step3.html", context= {
         "request": request, "step": 3, "total_steps": 4,
         "country": safe_country, "state": safe_state, "zip_code": safe_zip,
         "active_nav": "wizard"
@@ -260,7 +260,7 @@ async def wizard_step3_post(
     safe_zip = sanitize(zip_code, 10)
 
     show_moved = safe_reg in (RegistrationStatus.UNSURE.value, RegistrationStatus.NO.value)
-    return templates.TemplateResponse("wizard/step4.html", {
+    return templates.TemplateResponse(request=request, name="wizard/step4.html", context= {
         "request": request, "step": 4, "total_steps": 4,
         "country": safe_country, "state": safe_state, "zip_code": safe_zip,
         "registration_status": safe_reg,
@@ -295,7 +295,7 @@ async def wizard_step4_post(
         voting_elsewhere=voting_elsewhere,
         zip_code=safe_zip or None
     )
-    return templates.TemplateResponse("timeline.html", {
+    return templates.TemplateResponse(request=request, name="timeline.html", context= {
         "request": request,
         "timeline": timeline_data.model_dump(),
         "active_nav": "wizard"
@@ -309,7 +309,7 @@ async def wizard_step4_post(
 @app.get("/quiz", response_class=HTMLResponse)
 async def quiz_landing(request: Request):
     """Quiz selection page."""
-    return templates.TemplateResponse("quiz/landing.html", {
+    return templates.TemplateResponse(request=request, name="quiz/landing.html", context= {
         "request": request, "active_nav": "quiz"
     })
 
@@ -338,14 +338,14 @@ async def quiz_start(
     )
     
     if not questions:
-        return templates.TemplateResponse("quiz/no_questions.html", {
+        return templates.TemplateResponse(request=request, name="quiz/no_questions.html", context= {
             "request": request, "country": safe_country, "state": safe_state
         }, status_code=404)
     
     import json
     questions_json = json.dumps([q.model_dump() for q in questions])
     
-    return templates.TemplateResponse("quiz/question.html", {
+    return templates.TemplateResponse(request=request, name="quiz/question.html", context= {
         "request": request,
         "country": safe_country,
         "state": safe_state,
@@ -446,7 +446,7 @@ async def scenarios_page(request: Request):
     """Scenario simulator landing page with grid of scenario cards."""
     start = time.time()
     increment("total_page_views")
-    response = templates.TemplateResponse("scenarios.html", {
+    response = templates.TemplateResponse(request=request, name="scenarios.html", context= {
         "request": request,
         "scenarios": SCENARIOS,
         "active_nav": "scenarios"
@@ -471,7 +471,7 @@ async def scenario_partial(
     result = await generate_scenario_solution(scenario_id, state or None)
 
     record_endpoint_time("/scenarios/partial", (time.time() - start) * 1000)
-    return templates.TemplateResponse("scenarios_partial.html", {
+    return templates.TemplateResponse(request=request, name="scenarios_partial.html", context= {
         "request": request,
         "result": result.model_dump() if result else None
     })
@@ -482,7 +482,7 @@ async def quiz_results(request: Request):
     """Display quiz results page."""
     # Note: Result data is passed via sessionStorage from frontend
     # This page displays the results template - actual data rendering happens client-side
-    return templates.TemplateResponse("quiz/results.html", {
+    return templates.TemplateResponse(request=request, name="quiz/results.html", context= {
         "request": request,
         "active_nav": "quiz"
     })
@@ -516,7 +516,7 @@ async def readiness_dashboard(
     color_class = get_readiness_color(readiness.overall_score)
     emoji = get_readiness_emoji(readiness.overall_score)
     
-    return templates.TemplateResponse("readiness/dashboard.html", {
+    return templates.TemplateResponse(request=request, name="readiness/dashboard.html", context= {
         "request": request,
         "readiness": readiness,
         "color_class": color_class,

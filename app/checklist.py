@@ -32,7 +32,7 @@ async def checklist_page(request: Request):
     )
     score_obj = await calculate_readiness_score(progress)
     
-    return templates.TemplateResponse("checklist.html", {
+    return templates.TemplateResponse(request=request, name="checklist.html", context= {
         "request": request,
         "active_nav": "checklist",
         "items": CHECKLIST_ITEMS,
@@ -56,7 +56,7 @@ async def checklist_toggle(request: Request, item_id: str):
     )
     score_obj = await calculate_readiness_score(progress)
     
-    return templates.TemplateResponse("checklist_score.html", {
+    return templates.TemplateResponse(request=request, name="checklist_score.html", context= {
         "request": request,
         "score": score_obj,
         "color": get_readiness_color(score_obj.overall_score),

@@ -47,7 +47,7 @@ async def view_stats(request: Request):
         else:
             avg_times[ep] = 0.0
             
-    return templates.TemplateResponse("stats.html", {
+    return templates.TemplateResponse(request=request, name="stats.html", context= {
         "request": request,
         "active_nav": "stats",
         "total_queries": stats_data["total_queries"],

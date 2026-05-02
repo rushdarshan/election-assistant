@@ -10,7 +10,7 @@ templates = Jinja2Templates(directory="templates")
 
 @router.get("/map", response_class=HTMLResponse)
 async def map_page(request: Request):
-    return templates.TemplateResponse("map.html", {
+    return templates.TemplateResponse(request=request, name="map.html", context= {
         "request": request,
         "active_nav": "map"
     })
@@ -21,7 +21,7 @@ async def fetch_map(request: Request, address: str = Form(...)):
     api_key = os.getenv("GOOGLE_CIVIC_API_KEY", "")
     
     if not api_key:
-        return templates.TemplateResponse("map_result.html", {
+        return templates.TemplateResponse(request=request, name="map_result.html", context= {
             "request": request,
             "error": "API Key not configured. Please visit your state's official election website."
         })
@@ -45,7 +45,7 @@ async def fetch_map(request: Request, address: str = Form(...)):
                 early_voting = data.get("earlyVoteSites", [])
                 state_info = data.get("state", [])
                 
-                return templates.TemplateResponse("map_result.html", {
+                return templates.TemplateResponse(request=request, name="map_result.html", context= {
                     "request": request,
                     "polling_locations": polling_locations,
                     "early_voting": early_voting,
@@ -53,12 +53,12 @@ async def fetch_map(request: Request, address: str = Form(...)):
                     "address": address
                 })
             else:
-                return templates.TemplateResponse("map_result.html", {
+                return templates.TemplateResponse(request=request, name="map_result.html", context= {
                     "request": request,
                     "error": "Unable to find polling location for this address. Please visit your state's official election website."
                 })
         except Exception as e:
-            return templates.TemplateResponse("map_result.html", {
+            return templates.TemplateResponse(request=request, name="map_result.html", context= {
                 "request": request,
                 "error": f"Error looking up address: {str(e)}"
             })

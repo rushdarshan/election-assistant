@@ -17,7 +17,7 @@ if api_key:
 @router.get("/chat", response_class=HTMLResponse)
 async def chat_page(request: Request):
     chat_history = request.session.get("chat_history", [])
-    return templates.TemplateResponse("chat.html", {
+    return templates.TemplateResponse(request=request, name="chat.html", context= {
         "request": request,
         "active_nav": "chat",
         "chat_history": chat_history
@@ -54,7 +54,7 @@ async def chat_post(request: Request, message: str = Form(...)):
         
     request.session["chat_history"] = chat_history
     
-    return templates.TemplateResponse("chat_messages.html", {
+    return templates.TemplateResponse(request=request, name="chat_messages.html", context= {
         "request": request,
         "messages": [user_msg, ai_msg]
     })
