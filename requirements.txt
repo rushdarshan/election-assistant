@@ -12,3 +12,5 @@ python-multipart
 itsdangerous
 google-generativeai
 python-dotenv
+slowapi
+cachetools

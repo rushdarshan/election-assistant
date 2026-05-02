@@ -53,10 +53,24 @@ Return a JSON object matching the required schema. Include:
     return prompt
 
 from app.security import validate_llm_output
+import time
+import hashlib
+
+_CACHE = {}
+_CACHE_TTL = 3600
 
 async def ask_why(country: str, state: str, topic_id: str, timeline_context: TimelineResult) -> AskWhyResponse:
     snippets = retrieve_snippets(country, state, topic_id)
     user_prompt = build_user_prompt(country, state, topic_id, timeline_context, snippets)
+    
+    # ── Efficiency: Cache layer ──
+    cache_key = hashlib.md5(user_prompt.encode('utf-8')).hexdigest()
+    now = time.time()
+    if cache_key in _CACHE:
+        entry, timestamp = _CACHE[cache_key]
+        if now - timestamp < _CACHE_TTL:
+            return AskWhyResponse(**entry)
+
     
     fallback_kwargs = {
         "topic_id": topic_id,
@@ -82,7 +96,9 @@ async def ask_why(country: str, state: str, topic_id: str, timeline_context: Tim
         )
         
         # Security: Use the security layer for JSON schema validation and parsing
-        return validate_llm_output(response.text, AskWhyResponse, fallback_kwargs=fallback_kwargs)
+        valid_response = validate_llm_output(response.text, AskWhyResponse, fallback_kwargs=fallback_kwargs)
+        _CACHE[cache_key] = (valid_response.model_dump(), time.time())
+        return valid_response
         
     except Exception as e:
         print(f"Agentic RAG generation failed: {e}")

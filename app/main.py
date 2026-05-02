@@ -14,6 +14,10 @@ from fastapi.templating import Jinja2Templates
 from fastapi.exceptions import HTTPException
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.sessions import SessionMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
 from app.analytics import increment, record_endpoint_time
 from app.models import (
@@ -28,6 +32,11 @@ from app.readiness import calculate_readiness_score, get_readiness_color, get_re
 app = FastAPI(title="Election Process Education Assistant")
 templates = Jinja2Templates(directory="templates")
 
+# ── Rate Limiter ──
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
 # ── Session Middleware (signed cookies, 30-min TTL) ──
 _session_secret = os.getenv("SESSION_SECRET")
 if not _session_secret:
@@ -40,6 +49,19 @@ app.add_middleware(
     https_only=True,
     same_site="strict",
 )
+
+# ── Security Headers Middleware ──
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        response.headers["Content-Security-Policy"] = "default-src 'self' https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; font-src 'self' data: https:;"
+        return response
+
+app.add_middleware(SecurityHeadersMiddleware)
 
 # ── Analytics import (moved to top) ──
 
@@ -161,7 +183,8 @@ async def get_timeline(
 
 # ── Ask-Why (JSON API for JS fetch) ──
 @app.post("/ask-why", response_class=JSONResponse)
-async def ask_why_endpoint(req: AskWhyRequest):
+@limiter.limit("20/minute")
+async def ask_why_endpoint(request: Request, req: AskWhyRequest):
     response = await ask_why(
         country=req.country,
         state=req.state,
@@ -173,6 +196,7 @@ async def ask_why_endpoint(req: AskWhyRequest):
 
 # ── Ask-Why (HTMX partial for wizard flow) ──
 @app.post("/ask-why/partial", response_class=HTMLResponse)
+@limiter.limit("20/minute")
 async def ask_why_partial(
     request: Request,
     topic_id: str = Form(...),
@@ -315,6 +339,7 @@ async def quiz_landing(request: Request):
 
 
 @app.post("/quiz/start", response_class=HTMLResponse)
+@limiter.limit("10/minute")
 async def quiz_start(
     request: Request,
     country: str = Form("US"),
