@@ -1,16 +1,38 @@
-pytest
-pytest-asyncio
+# Core
 fastapi
 uvicorn
 jinja2
 pydantic
 pydantic-settings
-httpx
-google-cloud-aiplatform
-PyYAML
 python-multipart
-itsdangerous
-google-generativeai
 python-dotenv
+
+# HTTP
+httpx
+
+# Authentication
+PyJWT>=2.8.0
+bcrypt>=4.0.0
+firebase-admin>=6.0.0
+
+# Session & Security
+itsdangerous
 slowapi
-cachetools
+
+# Database
+motor>=3.3.0
+
+# Google Services
+google-cloud-aiplatform
+google-generativeai
+google-cloud-translate
+google-cloud-language
+
+# Data
+PyYAML
+motor
+
+# Testing (dev)
+pytest
+pytest-asyncio
+ruff

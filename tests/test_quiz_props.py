@@ -1,7 +1,7 @@
 """Property-based tests for quiz grading and scoring."""
 
 import pytest
-from hypothesis import given, strategies as st
+from hypothesis import given, settings, HealthCheck, strategies as st
 from app.quiz import grade_quiz, calculate_knowledge_score
 from app.models import QuizSession
 from tests.strategies import quiz_grading_inputs
@@ -11,6 +11,7 @@ class TestQuizGrading:
 
     @pytest.mark.asyncio
     @given(inputs=quiz_grading_inputs())
+    @settings(suppress_health_check=[HealthCheck.too_slow])
     async def test_grade_quiz_contract(self, inputs):
         """Assert score is correct and breakdown matches input questions."""
         session = QuizSession(country="US", state="CA")

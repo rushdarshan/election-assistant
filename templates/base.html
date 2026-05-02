@@ -6,6 +6,25 @@
     <meta name="description" content="Election Process Education Assistant — your personalized, step-by-step guide to voting deadlines, registration, and election day.">
     <title>{% block title %}Election Process Guide{% endblock %}</title>
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script>
+        // CSRF: read token from cookie and send as X-CSRFToken header on all HTMX requests
+        (function() {
+            function getCookie(name) {
+                var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+                return match ? decodeURIComponent(match[2]) : null;
+            }
+            var csrfToken = getCookie('csrftoken');
+            if (csrfToken) {
+                htmx.config.headers['X-CSRFToken'] = csrfToken;
+            }
+            document.addEventListener('htmx:afterSettle', function() {
+                var newToken = getCookie('csrftoken');
+                if (newToken) {
+                    htmx.config.headers['X-CSRFToken'] = newToken;
+                }
+            });
+        })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,600;7..72,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">

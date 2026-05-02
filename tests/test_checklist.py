@@ -12,6 +12,17 @@ def client():
         yield c
 
 
+@pytest.fixture
+def csrf_client():
+    """Client with CSRF cookie pre-loaded."""
+    with TestClient(app) as c:
+        c.get("/")
+        csrf_token = c.cookies.get("csrftoken", "")
+        if csrf_token:
+            c.headers["X-CSRFToken"] = csrf_token
+        yield c
+
+
 class TestChecklistPage:
     def test_get_checklist_returns_200(self, client):
         response = client.get("/checklist")
@@ -28,29 +39,25 @@ class TestChecklistPage:
 
     def test_get_checklist_shows_initial_score(self, client):
         response = client.get("/checklist")
-        # Should display a readiness score even with no items checked
         assert "readiness" in response.text.lower() or "score" in response.text.lower()
 
 
 class TestChecklistToggle:
-    def test_toggle_item_updates_session(self, client):
-        response = client.post("/checklist/toggle/c1")
+    def test_toggle_item_updates_session(self, csrf_client):
+        response = csrf_client.post("/checklist/toggle/c1")
         assert response.status_code == 200
         assert "text/html" in response.headers.get("content-type", "")
 
-    def test_toggle_all_items(self, client):
+    def test_toggle_all_items(self, csrf_client):
         for item in CHECKLIST_ITEMS:
-            response = client.post(f"/checklist/toggle/{item['id']}")
+            response = csrf_client.post(f"/checklist/toggle/{item['id']}")
             assert response.status_code == 200
 
-    def test_toggle_then_untoggle(self, client):
-        # Toggle on
-        client.post("/checklist/toggle/c1")
-        # Toggle off
-        response = client.post("/checklist/toggle/c1")
+    def test_toggle_then_untoggle(self, csrf_client):
+        csrf_client.post("/checklist/toggle/c1")
+        response = csrf_client.post("/checklist/toggle/c1")
         assert response.status_code == 200
 
-    def test_toggle_unknown_item_still_works(self, client):
-        # The route accepts any item_id; it just adds to session state
-        response = client.post("/checklist/toggle/unknown_item")
+    def test_toggle_unknown_item_still_works(self, csrf_client):
+        response = csrf_client.post("/checklist/toggle/unknown_item")
         assert response.status_code == 200

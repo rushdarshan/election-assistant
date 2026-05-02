@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.12", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Lint with ruff
+        run: |
+          ruff check app/ tests/
+
+      - name: Run tests with coverage
+        env:
+          GOOGLE_CIVIC_API_KEY: test-key
+          GEMINI_API_KEY: test-key
+          SESSION_SECRET: test-session-secret
+          JWT_SECRET: test-jwt-secret
+        run: |
+          pytest tests/ -v --tb=short --cov=app --cov-report=xml --cov-report=term-missing
+
+      - name: Upload coverage to GitHub
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.python-version }}
+          path: coverage.xml
+
+  security-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for exposed secrets
+        run: |
+          # Verify no real API keys are committed
+          if grep -r "AIzaSy[A-Za-z0-9_-]" --include="*.py" --include="*.json" --include="*.yaml" --include="*.yml" --include="*.txt" --exclude-dir=.github --exclude-dir=tests .; then
+            echo "ERROR: Potential API key found in repository"
+            exit 1
+          fi
+          echo "No exposed secrets found"
+
+      - name: Verify .env is not tracked
+        run: |
+          if git ls-files --error-unmatch .env 2>/dev/null; then
+            echo "ERROR: .env file is tracked by git"
+            exit 1
+          fi
+          echo ".env is properly ignored"
