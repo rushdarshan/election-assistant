@@ -456,7 +456,7 @@ async def quiz_submit(req: Request):
             "recommendations": recommendations
         }
     except Exception as e:
-        return {"error": str(e)}, 400
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 # ──────────────────────────────────
@@ -560,8 +560,6 @@ async def readiness_update(req: Request):
         
         progress = ReadinessProgress(
             country=data["country"],
-            model = genai.GenerativeModel('gemini-pro',
-            system_instruction="You are a non-partisan election assistant..."),
             state=data.get("state", ""),
             registration_status=data.get("registration_status"),
             voting_method=data.get("voting_method"),
@@ -588,5 +586,5 @@ async def readiness_update(req: Request):
             "completion_percentage": readiness.completion_percentage
         }
     except Exception as e:
-        return {"error": str(e)}, 400
+        raise HTTPException(status_code=400, detail=str(e))
 
