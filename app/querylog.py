@@ -76,7 +76,7 @@ class QueryLogMiddleware(BaseHTTPMiddleware):
     ):
         """Insert query log document into MongoDB."""
         mongo_db = db_module.db
-        if not mongo_db:
+        if mongo_db is None:
             return
         try:
             doc = create_query_log_doc(

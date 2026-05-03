@@ -78,7 +78,7 @@ async def close_mongo():
 
 async def _ensure_indexes():
     """Create indexes for performance."""
-    if not db:
+    if db is None:
         return
     await db.users.create_index("email", unique=True, background=True)
     await db.users.create_index("auth_provider", background=True)

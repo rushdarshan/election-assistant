@@ -56,7 +56,7 @@ def _get_mongo_db():
 async def _save_user_to_mongo(user: dict):
     """Save user to MongoDB if available."""
     mongo_db = _get_mongo_db()
-    if mongo_db:
+    if mongo_db is not None:
         try:
             await mongo_db.users.update_one(
                 {"email": user["email"]},
@@ -70,7 +70,7 @@ async def _save_user_to_mongo(user: dict):
 async def _find_user_by_email(email: str) -> Optional[dict]:
     """Find user in MongoDB if available, fallback to memory."""
     mongo_db = _get_mongo_db()
-    if mongo_db:
+    if mongo_db is not None:
         try:
             doc = await mongo_db.users.find_one({"email": email.lower().strip()})
             if doc:
@@ -125,7 +125,7 @@ async def get_current_user(
         if not user_id or user_id not in _users:
             # Try MongoDB fallback
             mongo_db = _get_mongo_db()
-            if mongo_db:
+            if mongo_db is not None:
                 doc = await mongo_db.users.find_one({"id": user_id})
                 if doc:
                     doc.pop("_id", None)
@@ -181,7 +181,7 @@ async def register(request: Request, req: RegisterRequest):
 
     if not user:
         mongo_db = _get_mongo_db()
-        if mongo_db:
+        if mongo_db is not None:
             user = await mongo_db.users.find_one({"email": email})
             if user:
                 user_id = user["id"]
@@ -234,7 +234,7 @@ async def login(request: Request, req: LoginRequest):
     else:
         # Fallback to MongoDB
         mongo_db = _get_mongo_db()
-        if mongo_db:
+        if mongo_db is not None:
             user = await mongo_db.users.find_one({"email": email})
             if user:
                 user_id = user["id"]
@@ -287,7 +287,7 @@ async def google_auth(request: Request, req: GoogleAuthRequest):
 
     if not user:
         mongo_db = _get_mongo_db()
-        if mongo_db:
+        if mongo_db is not None:
             user = await mongo_db.users.find_one({"email": email})
             if user:
                 user_id = user["id"]
