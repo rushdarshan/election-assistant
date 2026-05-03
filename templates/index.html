@@ -732,6 +732,58 @@
     </div>
 </section>
 
+<!-- Interactive Learning Hub (Level Design: Optional Skill Rooms) -->
+<section class="interactive-hub" aria-label="Interactive Learning Tools" style="padding: var(--space-3xl) 0; background: var(--civic-light); border-bottom: 1px solid var(--civic-border);">
+    <div class="container">
+        <div class="flow-header" style="text-align: center; max-width: 800px;">
+            <div class="flow-label" style="background: var(--stage-4-violet-light); color: var(--stage-4-violet); border: 1px solid var(--stage-4-violet);">Interactive Learning</div>
+            <h2>Practice before you participate.</h2>
+            <p style="margin: 0 auto; color: var(--civic-gray);">Election day shouldn't be your first time seeing a ballot. Build confidence with our interactive tools, simulators, and readiness tests.</p>
+        </div>
+
+        <div class="flow-grid" style="margin-top: var(--space-2xl);">
+            <a href="/evm" class="flow-card" style="text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; border-top: 4px solid var(--nav-accent); display: flex; flex-direction: column;">
+                <div class="flow-step" style="background: var(--civic-accent-lightest); color: var(--civic-accent);">
+                    <svg class="icon icon-flow" aria-hidden="true"><use href="#icon-vote"></use></svg>
+                </div>
+                <h3>EVM Simulator</h3>
+                <p style="flex-grow: 1;">Experience a realistic Electronic Voting Machine interface. Learn how to cast your vote, verify with VVPAT, and avoid common errors before stepping into the booth.</p>
+                <div style="margin-top: var(--space-md); font-weight: 600; color: var(--civic-accent); display: flex; align-items: center; gap: 0.25rem;">
+                    Try the Simulator <svg class="icon" aria-hidden="true" style="width: 0.8em; height: 0.8em;"><use href="#icon-chevron-right"></use></svg>
+                </div>
+            </a>
+
+            <a href="/quiz" class="flow-card" style="text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; border-top: 4px solid var(--flow-2-green); display: flex; flex-direction: column;">
+                <div class="flow-step" style="background: var(--flow-2-green-light); color: var(--flow-2-green);">
+                    <svg class="icon icon-flow" aria-hidden="true"><use href="#icon-quiz"></use></svg>
+                </div>
+                <h3>Voter Readiness Quiz</h3>
+                <p style="flex-grow: 1;">Test your knowledge of registration rules, ID requirements, and ballot security. Identify blind spots and earn your Certified Voter badge.</p>
+                <div style="margin-top: var(--space-md); font-weight: 600; color: var(--flow-2-green); display: flex; align-items: center; gap: 0.25rem;">
+                    Start the Quiz <svg class="icon" aria-hidden="true" style="width: 0.8em; height: 0.8em;"><use href="#icon-chevron-right"></use></svg>
+                </div>
+            </a>
+
+            <a href="/scenarios" class="flow-card" style="text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; border-top: 4px solid var(--flow-3-orange); display: flex; flex-direction: column;">
+                <div class="flow-step" style="background: var(--flow-3-orange-light); color: var(--flow-3-orange);">
+                    <svg class="icon icon-flow" aria-hidden="true"><use href="#icon-scenarios"></use></svg>
+                </div>
+                <h3>Real-World Scenarios</h3>
+                <p style="flex-grow: 1;">"I just moved last week" or "My signature changed." Explore how to handle edge cases and common voting hurdles without losing your vote.</p>
+                <div style="margin-top: var(--space-md); font-weight: 600; color: var(--flow-3-orange); display: flex; align-items: center; gap: 0.25rem;">
+                    Explore Scenarios <svg class="icon" aria-hidden="true" style="width: 0.8em; height: 0.8em;"><use href="#icon-chevron-right"></use></svg>
+                </div>
+            </a>
+        </div>
+    </div>
+</section>
+<style>
+.flow-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-xl);
+}
+</style>
+
 <div class="container">
     <!-- 5-Stage Voter Journey (Education hub) -->
     <section class="journey-section" aria-label="The Voter Journey">
@@ -968,5 +1020,101 @@
         zipContainer.style.display = country === 'IN' ? 'none' : 'block';
     }
     updateQuickForm();
+</script>
+
+<canvas id="bg-canvas" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:-1;opacity:0.4;pointer-events:none;"></canvas>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+    // Three.js WebGL Particle Background (Tricolor + Ashoka Chakra theme)
+    (function initThreeJS() {
+        const canvas = document.getElementById('bg-canvas');
+        if (!canvas || !window.THREE) return;
+        
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+        
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        
+        // Particles (Tricolor: Saffron #FF9933, White #FFFFFF, Green #138808)
+        const particleCount = 400;
+        const geometry = new THREE.BufferGeometry();
+        const positions = new Float32Array(particleCount * 3);
+        const colors = new Float32Array(particleCount * 3);
+        
+        const colorPalette = [
+            new THREE.Color(0xFF9933), // Saffron
+            new THREE.Color(0xFFFFFF), // White
+            new THREE.Color(0x138808), // Green
+            new THREE.Color(0x000080)  // Navy Blue (Ashoka Chakra)
+        ];
+        
+        for (let i = 0; i < particleCount; i++) {
+            positions[i * 3] = (Math.random() - 0.5) * 10;
+            positions[i * 3 + 1] = (Math.random() - 0.5) * 10;
+            positions[i * 3 + 2] = (Math.random() - 0.5) * 10;
+            
+            const color = colorPalette[Math.floor(Math.random() * colorPalette.length)];
+            colors[i * 3] = color.r;
+            colors[i * 3 + 1] = color.g;
+            colors[i * 3 + 2] = color.b;
+        }
+        
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        
+        const material = new THREE.PointsMaterial({
+            size: 0.05,
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.8,
+            blending: THREE.AdditiveBlending
+        });
+        
+        const particles = new THREE.Points(geometry, material);
+        scene.add(particles);
+        
+        // Central abstract Chakra element
+        const chakraGeo = new THREE.TorusGeometry(1.5, 0.02, 16, 100);
+        const chakraMat = new THREE.MeshBasicMaterial({ 
+            color: 0x000080, 
+            transparent: true, 
+            opacity: 0.3,
+            wireframe: true 
+        });
+        const chakra = new THREE.Mesh(chakraGeo, chakraMat);
+        scene.add(chakra);
+        
+        camera.position.z = 5;
+        
+        let mouseX = 0;
+        let mouseY = 0;
+        document.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+            mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+        });
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            particles.rotation.x += 0.0005;
+            particles.rotation.y += 0.001;
+            chakra.rotation.z -= 0.005; // 24 spokes spinning
+            
+            // Subtle parallax
+            camera.position.x += (mouseX * 0.5 - camera.position.x) * 0.05;
+            camera.position.y += (mouseY * 0.5 - camera.position.y) * 0.05;
+            camera.lookAt(scene.position);
+            
+            renderer.render(scene, camera);
+        }
+        animate();
+        
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    })();
 </script>
 {% endblock %}

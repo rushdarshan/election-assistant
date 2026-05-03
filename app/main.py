@@ -195,7 +195,11 @@ async def stats_middleware(request: Request, call_next):
     stats.stats_data["total_queries"] += 1
     endpoint = request.url.path
     stats.stats_data["endpoints"][endpoint] += 1
-    stats.stats_data["response_times"][endpoint].append(process_time)
+    
+    times = stats.stats_data["response_times"][endpoint]
+    times.append(process_time)
+    if len(times) > 100:
+        times.pop(0)
 
     return response
 
@@ -261,6 +265,73 @@ async def healthz():
         },
     }
 
+# ── Progressive Web App (PWA) ──
+@app.get("/manifest.json", response_class=JSONResponse)
+async def get_manifest():
+    return {
+        "name": "Election Process Education Assistant",
+        "short_name": "ElectionGuide",
+        "start_url": "/",
+        "display": "standalone",
+        "background_color": "#ffffff",
+        "theme_color": "#2c5282",
+        "description": "Your personalized voter journey and election assistant.",
+        "icons": [
+            {
+                "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMmM1MjgyIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTIuNSAxNWEyLjUgMi41IDAgMCAwIDUtNW0xNCAwaS01bS01LTlhNSA1IDAgMCAxIDUgNW0wIDBjMCAyLjgtMi4yIDUtNSA1cy01LTIuMi01LTUiLz48L3N2Zz4=",
+                "sizes": "192x192",
+                "type": "image/svg+xml"
+            }
+        ]
+    }
+
+@app.get("/sw.js")
+async def get_service_worker():
+    sw_code = """
+const CACHE_NAME = 'election-guide-v1';
+const ASSETS = [
+  '/',
+  '/manifest.json'
+];
+
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then((cache) => cache.addAll(ASSETS))
+      .then(() => self.skipWaiting())
+  );
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cache) => {
+          if (cache !== CACHE_NAME) return caches.delete(cache);
+        })
+      );
+    })
+  );
+  self.clients.claim();
+});
+
+self.addEventListener('fetch', (event) => {
+  // Only cache GET requests
+  if (event.request.method !== 'GET') return;
+  // Network first, fallback to cache for HTML
+  event.respondWith(
+    fetch(event.request)
+      .then(response => {
+        const resClone = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, resClone));
+        return response;
+      })
+      .catch(() => caches.match(event.request))
+  );
+});
+"""
+    from fastapi.responses import Response
+    return Response(content=sw_code, media_type="application/javascript")
 
 # ── Landing ──
 @app.get("/", response_class=HTMLResponse)

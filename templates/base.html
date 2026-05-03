@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Election Process Education Assistant — your personalized, step-by-step guide to voting deadlines, registration, and election day.">
+    <meta name="theme-color" content="#2c5282">
+    <link rel="manifest" href="/manifest.json">
     <title>{% block title %}Election Process Guide{% endblock %}</title>
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <!-- CSRF token injected per-request via htmx:configRequest event listener (see bottom of body) -->
@@ -536,10 +538,13 @@
             .container { padding: 0 var(--space-md); }
             .card { padding: var(--space-lg); }
             .form-grid { grid-template-columns: 1fr; gap: var(--space-md); }
-            .nav-links { gap: var(--space-xs); }
-            .nav-links a { font-size: 0.8rem; padding: var(--space-xs); }
+            .nav-links { gap: var(--space-xs); overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; padding-bottom: 4px; }
+            .nav-links::-webkit-scrollbar { display: none; }
+            .nav-links a { font-size: 0.8rem; padding: var(--space-xs); display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 50px; }
+            .nav-links .icon { margin-right: 0; margin-bottom: 2px; }
+            .nav-label { font-size: 0.65rem; }
             .site-nav .brand { font-size: 1.1rem; }
-            .nav-controls { gap: var(--space-md); }
+            .nav-controls { gap: var(--space-md); overflow: hidden; }
         }
 
         /* ── Wizard Steps ── */
@@ -652,17 +657,13 @@
             </a>
             <div class="nav-controls">
                 <ul class="nav-links">
-                    <li><a href="/" {% if active_nav == 'home' %}aria-current="page"{% endif %} title="Home"><svg class="icon"><use href="#icon-home"></use></svg><span class="sr-only">Home</span></a></li>
-                    <li><a href="/wizard" {% if active_nav == 'wizard' %}aria-current="page"{% endif %} title="Journey"><svg class="icon"><use href="#icon-timeline"></use></svg><span class="sr-only">Journey</span></a></li>
-                    <li><a href="/quiz" {% if active_nav == 'quiz' %}aria-current="page"{% endif %} title="Quiz"><svg class="icon"><use href="#icon-quiz"></use></svg><span class="sr-only">Quiz</span></a></li>
-                    <li><a href="/readiness" {% if active_nav == 'readiness' %}aria-current="page"{% endif %} title="Readiness"><svg class="icon"><use href="#icon-readiness"></use></svg><span class="sr-only">Readiness</span></a></li>
-                    <li><a href="/scenarios" {% if active_nav == 'scenarios' %}aria-current="page"{% endif %} title="Scenarios"><svg class="icon"><use href="#icon-scenarios"></use></svg><span class="sr-only">Scenarios</span></a></li>
-                    <li><a href="/checklist" {% if active_nav == 'checklist' %}aria-current="page"{% endif %} title="Checklist"><svg class="icon"><use href="#icon-checklist"></use></svg><span class="sr-only">Checklist</span></a></li>
-                    <li><a href="/chat" {% if active_nav == 'chat' %}aria-current="page"{% endif %} title="Chat"><svg class="icon"><use href="#icon-chat"></use></svg><span class="sr-only">Chat</span></a></li>
-                    <li><a href="/evm" {% if active_nav == 'evm' %}aria-current="page"{% endif %} title="EVM Simulator"><svg class="icon"><use href="#icon-vote"></use></svg><span class="sr-only">EVM</span></a></li>
-                    <li><a href="/map" {% if active_nav == 'map' %}aria-current="page"{% endif %} title="Map"><svg class="icon"><use href="#icon-map"></use></svg><span class="sr-only">Map</span></a></li>
-                    <li><a href="/profile" {% if active_nav == 'profile' %}aria-current="page"{% endif %} title="Profile"><svg class="icon"><use href="#icon-readiness"></use></svg><span class="sr-only">Profile</span></a></li>
-                    <li><a href="/stats" {% if active_nav == 'stats' %}aria-current="page"{% endif %} title="Stats"><svg class="icon"><use href="#icon-stats"></use></svg><span class="sr-only">Stats</span></a></li>
+                    <li><a href="/" {% if active_nav == 'home' %}aria-current="page"{% endif %} title="Home"><svg class="icon" style="margin-right: 4px;"><use href="#icon-home"></use></svg><span class="nav-label">Home</span></a></li>
+                    <li><a href="/wizard" {% if active_nav == 'wizard' %}aria-current="page"{% endif %} title="My Journey"><svg class="icon" style="margin-right: 4px;"><use href="#icon-timeline"></use></svg><span class="nav-label">Journey</span></a></li>
+                    <li><a href="/checklist" {% if active_nav == 'checklist' %}aria-current="page"{% endif %} title="Checklist"><svg class="icon" style="margin-right: 4px;"><use href="#icon-checklist"></use></svg><span class="nav-label">Checklist</span></a></li>
+                    <li><a href="/quiz" {% if active_nav == 'quiz' %}aria-current="page"{% endif %} title="Quiz"><svg class="icon" style="margin-right: 4px;"><use href="#icon-quiz"></use></svg><span class="nav-label">Quiz</span></a></li>
+                    <li><a href="/evm" {% if active_nav == 'evm' %}aria-current="page"{% endif %} title="EVM Simulator"><svg class="icon" style="margin-right: 4px;"><use href="#icon-vote"></use></svg><span class="nav-label">EVM</span></a></li>
+                    <li><a href="/chat" {% if active_nav == 'chat' %}aria-current="page"{% endif %} title="Ask AI"><svg class="icon" style="margin-right: 4px;"><use href="#icon-chat"></use></svg><span class="nav-label">Ask AI</span></a></li>
+                    <li><a href="/profile" {% if active_nav == 'profile' %}aria-current="page"{% endif %} title="Profile"><svg class="icon" style="margin-right: 4px;"><use href="#icon-readiness"></use></svg><span class="nav-label">Profile</span></a></li>
                 </ul>
                 <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode" title="Toggle light/dark mode">
                     <svg class="icon" id="theme-icon-sun" style="display: none;"><use href="#icon-sun"></use></svg>
@@ -762,6 +763,17 @@
                 });
             }
         });
+        
+        // PWA Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js').then(function(registration) {
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                }, function(err) {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
     </script>
 </body>
 </html>

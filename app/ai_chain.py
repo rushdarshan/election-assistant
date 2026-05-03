@@ -143,6 +143,7 @@ class AIProviderChain:
         self._mongo_db = mongo_db
         logger.info("MongoDB persistent cache enabled")
 
+
     async def _get_mongo_cached(self, key: str) -> Optional[dict]:
         """Check MongoDB persistent cache."""
         if not self._mongo_db:
@@ -199,6 +200,9 @@ class AIProviderChain:
         return None
 
     def _set_cache(self, key: str, response: dict):
+        if len(self._cache) >= 1000:
+            for k in list(self._cache.keys())[:100]:
+                self._cache.pop(k, None)
         self._cache[key] = {
             "response": response.get("response", response),
             "provider": response.get("provider", "cached"),

@@ -175,11 +175,25 @@ class GoogleAuthRequest(BaseModel):
 @limiter.limit("20/15minutes")
 async def register(request: Request, req: RegisterRequest):
     email = req.email.lower().strip()
-    if email in _email_to_id:
+    # Check if identity exists (memory first, then DB)
+    user_id = _email_to_id.get(email)
+    user = _users.get(user_id) if user_id else None
+
+    if not user:
+        mongo_db = _get_mongo_db()
+        if mongo_db:
+            user = await mongo_db.users.find_one({"email": email})
+            if user:
+                user_id = user["id"]
+                _users[user_id] = user
+                _email_to_id[email] = user_id
+
+    if user:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="Email already registered",
+            detail=f"Email already registered via {user.get('auth_provider', 'email')}",
         )
+
     user_id = f"user_{uuid.uuid4().hex[:12]}"
     _users[user_id] = {
         "id": user_id,
@@ -214,12 +228,24 @@ async def register(request: Request, req: RegisterRequest):
 async def login(request: Request, req: LoginRequest):
     email = req.email.lower().strip()
     user_id = _email_to_id.get(email)
-    if not user_id or user_id not in _users:
+    user = None
+    if user_id and user_id in _users:
+        user = _users[user_id]
+    else:
+        # Fallback to MongoDB
+        mongo_db = _get_mongo_db()
+        if mongo_db:
+            user = await mongo_db.users.find_one({"email": email})
+            if user:
+                user_id = user["id"]
+                _users[user_id] = user
+                _email_to_id[email] = user_id
+
+    if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password",
         )
-    user = _users[user_id]
     if not _verify_password(req.password, user["hashed_password"]):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -255,11 +281,23 @@ async def google_auth(request: Request, req: GoogleAuthRequest):
     name = user_info.get("name", email.split("@")[0])
     firebase_uid = user_info.get("firebase_uid", email)
 
-    # Check if user exists
-    if email not in _email_to_id:
-        # Create new user
+    # Identity Resolution: Check memory, then database
+    user_id = _email_to_id.get(email)
+    user = _users.get(user_id) if user_id else None
+
+    if not user:
+        mongo_db = _get_mongo_db()
+        if mongo_db:
+            user = await mongo_db.users.find_one({"email": email})
+            if user:
+                user_id = user["id"]
+                _users[user_id] = user
+                _email_to_id[email] = user_id
+
+    if not user:
+        # Create new canonical entity
         user_id = f"user_{uuid.uuid4().hex[:12]}"
-        _users[user_id] = {
+        user = {
             "id": user_id,
             "email": email,
             "name": name,
@@ -272,15 +310,28 @@ async def google_auth(request: Request, req: GoogleAuthRequest):
             "readiness_score": 0,
             "created_at": datetime.now(timezone.utc).isoformat(),
         }
+        _users[user_id] = user
         _email_to_id[email] = user_id
-        await _save_user_to_mongo(_users[user_id])
-        logger.info(f"New user via Google OAuth: {email}")
+        await _save_user_to_mongo(user)
+        logger.info(f"New identity created via Google OAuth: {email} -> {user_id}")
     else:
-        user_id = _email_to_id[email]
-        # Update existing user's firebase_uid if not set
-        if not _users[user_id].get("firebase_uid"):
-            _users[user_id]["firebase_uid"] = firebase_uid
-            await _save_user_to_mongo(_users[user_id])
+        # Identity exists. Merge/Update fields if necessary.
+        user_id = user["id"]
+        updated = False
+        
+        if not user.get("firebase_uid"):
+            user["firebase_uid"] = firebase_uid
+            updated = True
+            
+        if user.get("auth_provider") == "email":
+            # Upgrade provider to include Google
+            user["auth_provider"] = "email,google"
+            updated = True
+            
+        if updated:
+            _users[user_id] = user
+            await _save_user_to_mongo(user)
+            logger.info(f"Identity merged/updated for: {email} -> {user_id}")
 
     token = _create_jwt(user_id)
     return JSONResponse(content={

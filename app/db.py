@@ -26,25 +26,44 @@ client: Optional[AsyncIOMotorClient] = None
 db: Optional[AsyncIOMotorDatabase] = None
 
 
-async def connect_to_mongo():
-    """Create MongoDB connection."""
+async def connect_to_mongo(retries=3, delay=2):
+    """Create MongoDB connection with retries and optimized pool sizing."""
     global client, db
-    # maxPoolSize=2: prevents connection exhaustion in serverless environments (Vercel)
-    # where multiple lambda instances spin up simultaneously
-    client = AsyncIOMotorClient(
-        MONGODB_URI,
-        maxPoolSize=2,
-        minPoolSize=0,
-        serverSelectionTimeoutMS=5000,
-        connectTimeoutMS=5000,
-    )
-    db = client[MONGODB_DB]
-    # Verify connection
-    await client.admin.command("ping")
-    logger.info(f"Connected to MongoDB: {MONGODB_DB}")
-    # Create indexes in background to avoid blocking startup
-    import asyncio
-    asyncio.ensure_future(_ensure_indexes())
+    
+    # Configure pool size dynamically based on environment
+    # Default to 50 for robust concurrent handling, allow override for serverless
+    max_pool = int(os.getenv("MONGO_MAX_POOL_SIZE", "50"))
+    min_pool = int(os.getenv("MONGO_MIN_POOL_SIZE", "10"))
+    
+    for attempt in range(retries):
+        try:
+            client = AsyncIOMotorClient(
+                MONGODB_URI,
+                maxPoolSize=max_pool,
+                minPoolSize=min_pool,
+                serverSelectionTimeoutMS=5000,
+                connectTimeoutMS=5000,
+                socketTimeoutMS=30000,
+                retryWrites=True,
+                w="majority",
+            )
+            db = client[MONGODB_DB]
+            # Verify connection
+            await client.admin.command("ping")
+            logger.info(f"Connected to MongoDB: {MONGODB_DB} (Pool: {min_pool}-{max_pool})")
+            
+            # Create indexes in background
+            import asyncio
+            asyncio.ensure_future(_ensure_indexes())
+            return
+        except Exception as e:
+            logger.warning(f"MongoDB connection attempt {attempt + 1}/{retries} failed: {e}")
+            if attempt < retries - 1:
+                import asyncio
+                await asyncio.sleep(delay)
+            else:
+                logger.error("Failed to connect to MongoDB after maximum retries.")
+                raise e
 
 
 async def close_mongo():
@@ -61,19 +80,19 @@ async def _ensure_indexes():
     """Create indexes for performance."""
     if not db:
         return
-    await db.users.create_index("email", unique=True)
-    await db.users.create_index("auth_provider")
-    await db.chat_history.create_index("user_id")
-    await db.chat_history.create_index("session_id")
-    await db.chat_history.create_index("created_at")
-    await db.quiz_results.create_index("user_id")
-    await db.quiz_results.create_index("created_at")
-    await db.checklists.create_index("user_id")
-    await db.query_logs.create_index("endpoint")
-    await db.query_logs.create_index("created_at")
-    await db.query_logs.create_index([("endpoint", 1), ("created_at", -1)])
-    await db.cache_entries.create_index("key", unique=True)
-    await db.cache_entries.create_index("expires_at")
+    await db.users.create_index("email", unique=True, background=True)
+    await db.users.create_index("auth_provider", background=True)
+    await db.chat_history.create_index("user_id", background=True)
+    await db.chat_history.create_index("session_id", background=True)
+    await db.chat_history.create_index("created_at", background=True)
+    await db.quiz_results.create_index("user_id", background=True)
+    await db.quiz_results.create_index("created_at", background=True)
+    await db.checklists.create_index("user_id", background=True)
+    await db.query_logs.create_index("endpoint", background=True)
+    await db.query_logs.create_index("created_at", background=True)
+    await db.query_logs.create_index([("endpoint", 1), ("created_at", -1)], background=True)
+    await db.cache_entries.create_index("key", unique=True, background=True)
+    await db.cache_entries.create_index("expires_at", expireAfterSeconds=0, background=True)
 
 
 # ── Document Models ──
